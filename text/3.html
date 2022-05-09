@@ -1,0 +1,2204 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML//EN">
+<html> <head>
+<!-- (C)2012 K.Yanai (UEC) -->
+<meta name="robots" content="noindex,nofellow">
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=UTF-8">
+<link href="https://fonts.googleapis.com/css?family=Lato:400,700|Noto+Sans+JP:400,700" rel="stylesheet">
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="../oop-new.css" type="text/css">
+
+<script type="text/javascript" src="../ans.js"></script>
+
+<script type="text/javascript" src="js/shCore.js"></script>
+<script type="text/javascript" src="js/shBrushJava.js"></script>
+<script type="text/javascript" src="js/shBrushCpp.js"></script>
+<link href="css/shCore.css" rel="stylesheet" type="text/css" />
+<link href="css/shCoreDefault2.css" rel="stylesheet" type="text/css" />
+<link href="css/shThemeDefault2.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript">
+     SyntaxHighlighter.all()
+</script>
+
+<title>J3課題 第3回目</title>
+</head>
+
+<body>
+<h1>J3課題 (第3回目)</h1>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+
+<h2>SWINGライブラリによるGUIプログラミング (2)</h2>
+
+<p>
+前回は，Swingを使った基本的なGUIプログラミングについて勉強しました．最も基本的なGUI部品である，画面にウィンドウを表示するクラス<code>JFrame</code>に加えて，ボタンを表示するクラス<code>JButton</code>と，文字を表示するクラス<code>JLabel</code>について使い方を学びました．
+</p>
+
+<p>
+他にもSwingには数多くの部品がありますが，例えば文字入力の<code>JTextField</code>やスライダーの<code>JSlider</code>など，GUI画面の多くはユーザがGUI画面上で操作してプログラムに情報を入力するための部品になっています．
+</p>
+
+<p>
+では，GUI画面に自由に絵を書くにはどうすればいいでしょうか？実は，そのような部品はありませんので，前回説明した継承を用いて新しい部品を作ってやる必要があります．
+</p>
+
+<p>
+今回は，まずGUIについて，<code>LayoutManager</code>と複数のボタンのイベントを1つの<code>actionPerformed</code>メソッドで処理する方法など補足的な説明を行なってから，その後，GUI部品を自分で作る方法を学びます．GUI部品の作り方では，最初に四角形を表示するだけの部品の作り方を学んで，次にマウスでクリックするとクリックした場所に点を打つ，というお絵かきプログラムの第一歩となるような部品の作り方について説明していきます．
+</p>
+
+<p>
+GUI部品を自分で作ることが出来れば，GUIプログラミングでは怖いものなしです．どんなGUIプログラムでも作れるようになるでしょう．
+</p>
+
+<!--<H2>SWING応用編 （簡易ドローエディタの作成）</H2>-->
+<p>
+今回は，<code>JPanel</code>を使って複雑な部品のレイアウトを可能にする方法，複数のボタンの処理，<code>JPanel</code>と<code>Graphics</code>クラスを使って独自の部品を作る方法を説明し，簡易的なお絵書きプログラムを作ってみます．まずは，マウスをクリックすると，赤い丸を表示できるプログラムを理解してもらって，それを拡張していきます．赤，青，黄色の3色と，丸と四角が選べるようにします．
+</p>
+
+<p>
+では，まずは，自由にGUI画面をレイアウトするための<code>LayoutManager</code>について説明します．そして，続いて新しいGUI部品を作るための方法を説明します．
+</p>
+
+<h3><tt>LayoutManager</tt></h3>
+
+<p>
+前回は，<code>BorderLayout</code>と<code>GridLayout</code>について学びました．ここではその他のレイアウトも簡単に説明しておきます．
+</p>
+
+<p>
+Swingには，<code>LayoutManager</code>という仕組みが存在し，例えば<code>JFrame</code>や後で説明する<code>JPanel</code>のようなGUI部品を入れることのできる部品(<code>java.awt.Container</code>クラスを継承したGUI部品は，すべて他の部品を中に入れることができ，この様な部品を<code>Container</code>と呼びます)に，GUI部品を<code>add</code>した場合にどのように配置するか，つまり，どの位置にどの大きさで表示するかは<code>LayoutManager</code>が自動的に計算します．
+</p>
+
+<p>
+GUIプログラムを実行して，マウスで<code>JFrame</code>のウィンドウの右下をドラッグして大きさを変化させると，<code>JFrame</code>の大きさに対して個々のGUI部品の大きさも適切に変化します．これは，内部で<code>LayoutManager</code>が自動的に適切な部品の大きさを変化させていたためです．
+</p>
+
+<div class="alert alert-info" role="alert">
+  <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+  <span class="sr-only">Tips:</span>
+各GUI部品には，<tt>getPreferredSize</tt>，<tt>getMinimumSize</tt>，<tt>getMaximumSize</tt>というメソッドがあり，それぞれ，その部品の推奨サイズ，最小サイズ，最大サイズを返します．<tt>LayoutManager</tt>はそれらのサイズを元に配置を計算しています．
+</div>
+
+<p>
+標準で提供されている<code>LayoutManager</code>は9種類あります．
+</p>
+
+<dl>
+  <dt><a href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/BorderLayout.html"><tt>BorderLayout</tt></a></dt><dd>中央と上下左右に最大5個の部品を配置．</dd>
+  <dt><a href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/CardLayout.html"><tt>CardLayout</tt></a></dt><dd>複数の部品を切り替えて表示．一度に１つの部品だけ．</dd>
+  <dt><a href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/FlowLayout.html"><tt>FlowLayout</tt></a></dt><dd>推奨サイズで左から右，上から下にに並べる．</dd>
+  <dt><a href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/GridLayout.html"><tt>GridLayout</tt></a></dt><dd>格子状に同じ大きさに配置．</dd>
+  <dt><a href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/GridBagLayout.html"><tt>GridBagLayout</tt></a></dt><dd>様々な制約を指定し複雑な配置を指定できる．</dd>
+  <dt><a href="http://docs.oracle.com/javase/jp/8/docs/api/javax/swing/BoxLayout.html"><tt>BoxLayout</tt></a></dt><dd>Swingで追加された．<code>GridBagLayout</code>同様，高度な配置が可能．</dd>
+  <dt><tt>OverlayLayout</tt>，<tt>ScrollPaneLayout</tt>，<tt>ViewportLayout</tt></dt><dd>Swingで追加されたレイアウトだが，主にSwingの内部で利用される．</dd>
+</dl>
+
+<p>
+レイアウトのイメージとしては，それぞれ次のような感じです．
+</p>
+
+<img src="layout2.gif" width=600/>
+
+<p>
+<code>GridLayout</code>は，縦5×横3の場合を示しています．<code>GridBagLayout</code>と<code>BoxLayout</code>はここには示してありませんが，指定が複雑な代わりに自由に部品を配置することが可能です．
+</p>
+
+<p>
+各<code>Container</code>(GUI部品を中に入れられる部品)にはデフォルトの<code>LayoutManager</code>が設定されています．自分で<code>LayoutManager</code>を切り替えない限り，デフォルトの<code>LayoutManager</code>が使われます．
+</p>
+
+<p>
+例えば，<code>JFrame</code>のデフォルトの<code>LayoutManager</code>は<code>BorderLayout</code>です．また，<code>JPanel</code>のデフォルトの<code>LayoutManager</code>は<code>FlowLayout</code>です．
+</p>
+
+<p>
+<code>LayoutManager</code>は，<code>setLayout</code>メソッドで変更することができます．<code>JFrame</code>を<code>GridLayout</code>にするには，以下のように<code>setLayout</code>メソッドを使います．
+</p>
+
+<pre class="ref">
+this.setLayout(new GridLayout(5, 3));
+</pre>
+
+<p>
+<code>GridBagLayout</code>や<code>BoxLayout</code>を用いると高度なレイアウトが可能ですが，それ以外に，単純な<code>LayoutManager</code>と<code>JPanel</code>を組み合わせて使うことによって複雑なレイアウトも指定できます．つまり，<code>JFrame</code>の中に<code>JPanel</code>を入れ，その中にさらに<code>JPanel</code>を入れるというように，入れ子の構造を作り，各<code>JPanel</code>で適切な<code>LayoutManager</code>に切り替えることによって，複数の<code>LayoutManager</code>を組み合わせて使います．例えば，以下のコードのようにすると，
+</p>
+
+<img src="PanelCombi.gif" width=600/>
+
+<p>
+の様なウィンドウが作れます．この例では，<code>JPanel</code>を2つ用意します．それぞれ，<code>GridLayout</code>の3 x 1，2 x 1として，<code>JButton</code>をそれぞれ縦に3つと2つ貼り付けます．それをさらに，<code>JFrame</code>の<code>WEST</code>と<code>EAST</code>にそれぞれ貼り付けます．このように，<code>JPanel</code>を入れ子にすることによって，複雑なレイアウトを実現することが可能になります．
+</p>
+
+<pre class="brush: java">
+import java.awt.*;
+import javax.swing.*;
+
+class CombiFrame extends JFrame {
+  public CombiFrame() {
+    // JPanelを2つ生成
+    JPanel  p1 = new JPanel(), p2 = new JPanel();
+    // JPanelに貼り付けるためのJButtonを5つ生成
+    JButton b1 = new JButton("button 1");
+    JButton b2 = new JButton("button 2");
+    JButton b3 = new JButton("button 3");
+    JButton b4 = new JButton("button 4");
+    JButton b5 = new JButton("button 5");
+    // JFrameのCENTERに貼り付けるための複数行の文字入力の部品の
+    // JTextAreaを生成
+    JTextArea t = new JTextArea(10, 20);
+
+    this.setTitle("Panel Combination");
+    // 2つのJPanelをそれぞれ，3x1, 2x1のGridLayoutに設定
+    p1.setLayout(new GridLayout(3, 1));
+    p2.setLayout(new GridLayout(2, 1));
+    // ボタンをそれぞれのJPanelに貼付け
+    p1.add(b1); p1.add(b2); p1.add(b3);
+    p2.add(b4); p2.add(b5);
+    
+    // JButtonが3つ張り付いたJPanelを左，
+    // JButtonが2つ張り付いたJPanelを右に貼り付ける
+    this.add(p1, BorderLayout.WEST);
+    this.add(p2, BorderLayout.EAST);
+    // 真ん中はJTextArea
+    this.add(t, BorderLayout.CENTER);
+
+    // packはJFrameのサイズを自動設定するメソッド．
+    // this.setSize(300, 200); などの代わり
+    this.pack(); 
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.setVisible(true);
+  }
+  public static void main(String[] args) {
+    new CombiFrame();
+  }
+}
+</pre>
+
+<div class="alert alert-info" role="alert">
+  <p><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+  <span class="sr-only">Tips:</span>
+  あまりお勧めしませんが，それ以外の方法として，<code>LayoutManager</code>を使わずにすべて座標で指定する方法もあります．
+  </p>
+
+<img src="NoLayout.gif" width=600/>
+
+<pre class="brush: java">
+import java.awt.*;
+import javax.swing.*;
+
+class NoLayout extends JFrame {
+  public NoLayout() {
+    JButton b1 = new JButton("button 1");
+    JButton b2 = new JButton("button 2");
+    JButton b3 = new JButton("button 3");
+    this.setTitle("No Layout"); 
+    this.setLayout(null);
+    b1.setBounds(50, 10, 100, 30);
+    b2.setBounds(50, 50, 100, 30);
+    b3.setBounds(50, 90, 100, 30);
+    this.add(b1);
+    this.add(b2);
+    this.add(b3);
+    this.setSize(300, 200);
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.setVisible(true);
+  }
+  public static void main(String[] args) {
+    new NoLayout();
+  }
+}
+</pre>
+
+<p>
+この場合，GUI部品の位置とサイズは固定ですので，フレームを拡大縮小しても部品の大きさは，<code>LayoutManager</code>を使っている場合と異なり，まったく変化しません．
+</p>
+</div>
+
+<p>
+なお，上のプログラムでは，
+</p>  
+
+<pre class=ref>
+this.pack();
+</pre>
+
+<p>
+というコードを実行しています．<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/awt/Window.html#pack--"><tt>pack</tt></a>はフレーム(<code>JFrame</code>)の大きさを決めるメソッドです．今までは<code>setSize</code>メソッドでピクセル数を指定して大きさを決めていましたが，<code>pack</code>メソッドを使うと，中に入っている部品の標準的な大きさからフレーム全体の大きさを計算します．<code>setSize</code>メソッドを使うと，逆に，フレーム全体の大きさから中の部品の大きさを計算することになります．
+</p>
+
+<div class=rep>
+<h1>練習問題1</h1>
+<p>
+サンプルプログラムの<code>CombiFrame</code>を改変して，以下のようなGUI画面を表示するプログラムを書いてみてください．
+</p>
+
+<div class="alert alert-success" role="alert">
+  <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+  <b>ヒント:</b> ボタンが10個張り付いた<code>JPanel</code>を<code>NORTH</code>に，ボタンが5個張り付いた<code>JPanel</code>を<code>WEST</code>に貼りつけてみてください．
+</div>
+
+<img src="panelcombi2.png" width=600/>
+
+</div>
+
+<!--
+<H3>無名クラス</H3>
+<p>
+1つのボタンにいちいち1つずつクラスを作っていては面倒です．
+そこで，「無名クラス（もしくは匿名クラス）」という，クラス名を持たない
+クラスを宣言することが出来ます．
+前述のHelloButtonを無名クラスを使って書き換えると次のようになります．
+</p>
+
+<pre class="brush: java">
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+class HelloButton2 {
+  public static void main(String[] args) {
+    JFrame f = new JFrame("Test");
+    JButton b = new JButton("Hello");
+
+    b.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent ev) {
+        System.out.println("Hello");
+      }
+    });
+    f.add(b,BorderLayout.SOUTH);
+    f.setSize(300,200);
+    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    f.setVisible(true);
+  }
+}
+</pre>
+<p>
+つまり，無名クラスは，</p>
+<pre class=ref>
+継承する親のクラス名またはインタフェース名 (){
+  メソッド定義
+}
+</pre>
+<p>
+です．これはオブジェクトですから，次の様に親クラスの型の変数に代入する
+ことももちろん出来ます．</p>
+
+<pre class=ref>
+ActionListener al = new ActionListener(){
+  public void actionPerformed(ActionEvent e){
+    System.out.println("push!!");
+  }
+};
+button1.addActionListener(al);
+button2.addActionListener(al);
+</pre>
+<p>
+何でもかんでもこれで済ませてしまうのは，プログラムが読みにくくなるので，
+やめた方がいいですが，上記の例のように単純な処理しかしない場合は簡潔に
+書けるので便利です．</p>-->
+
+<H3>リスナーの共用</H3>
+<p>
+今まで説明した方法では，<code>main</code>メソッドを含むクラスがリスナークラスを兼ねていたため，複数のボタンに対しそれぞれ別々の処理をしたい場合には対応が困難でした．また，独立したクラスとしてリスナークラスを用意したとしても，ボタンの数だけリスナークラスを用意する必要があり，ボタンがたくさんあるようなプログラムを書くのは大変です．そのような場合には，<code>actionPerformed</code>メソッドの中で，どのボタンから呼び出されたか判別し，ボタンに応じた処理を行うようにすることが出来ます．
+</p>
+
+<p>
+<code>actionPerformed</code>の引数である<code>ActionEvent</code>型のオブジェクトの<code>getSource()</code>メソッドを使えば，イベントが起こった部品のオブジェクトを調べることができます．これを使って，以下のプログラムのようにボタンに応じた処理を行うことができます．
+<!--(<a href="TestButton2.java.txt">プログラム例</a>)-->
+</p>
+
+<pre class="brush: java">
+JButton b1 = new JButton("Button 1");
+JButton b2 = new JButton("Button 2");
+JButton b3 = new JButton("Button 3");
+
+public void actionPerformed(ActionEvent e) {
+  if (e.getSource() == b1) {
+    // Button 1に対する処理
+  } else if (e.getSource() == b2) {
+    // Button 2に対する処理
+  } else if (e.getSource() == b3) {
+    // Button 3に対する処理
+  }
+}
+</pre>
+
+<div class="rep">
+<h1>練習問題2</h1>
+<p>
+まず，以下のプログラムを見てください．
+</p>
+
+<pre class="brush: java;">
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+class ButtonPanel extends JPanel {
+  // 内部クラスからは，そのクラスを含んでいる外部のクラスの
+  // privateフィールドをアクセスできます
+  private JLabel label; 
+  private JButton b1, b2, b3;
+
+  ButtonPanel() {
+    b1 = new JButton("Button 1");
+    b2 = new JButton("Button 2");
+    b3 = new JButton("Button 3");
+    label =  new JLabel("0", JLabel.CENTER);
+    // それぞれのボタンのリスナークラスのオブジェクトを生成
+    Button1Listener bl1 = new Button1Listener();
+    Button2Listener bl2 = new Button2Listener();
+    Button3Listener bl3 = new Button3Listener();
+    // それぞれに対応するリスナークラスのオブジェクトを対応付け
+    b1.addActionListener(bl1);
+    b2.addActionListener(bl2);
+    b3.addActionListener(bl3);
+
+    setLayout(new GridLayout(2, 2));
+    add(b1); add(b2); add(b3); add(label);
+  }
+  // ButtonPanelの中に内部クラスを3つ記述
+  class Button1Listener implements ActionListener {
+    public void actionPerformed(ActionEvent e) {
+      label.setText("1");
+    }
+  }
+  class Button2Listener implements ActionListener {
+    public void actionPerformed(ActionEvent e) {
+      label.setText("2");
+    }
+  }
+  class Button3Listener implements ActionListener {
+    public void actionPerformed(ActionEvent e) {
+      label.setText("3");
+    }
+  }
+}
+
+class TestButton extends JFrame {
+  public TestButton() {
+    ButtonPanel b = new ButtonPanel();
+    this.setTitle("Test Button");
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.add(b);
+    this.pack();
+    this.setVisible(true);
+  }
+  public static void main(String[] args) {
+    new TestButton();
+  }
+}
+</pre>
+
+<p>
+3つのボタンのイベントを処理しています．上記で述べた方法を使わず，それぞれのボタンが押された時に異なる動作をさせるには，このプログラム例の様に<code>actionPerformed</code>を持ったクラス(つまり<code>ActionListener</code>を実装したクラス)をそれぞれ別々に用意する必要があります．
+</p>
+
+<p>
+このプログラムでは，クラスの中にクラスを書く<em>内部クラス(inner class)</em>を用いています．内部クラスとはクラスの内部で定義するクラスのことで，外側のクラス(内部クラスを含んでいるクラス)からしか利用できない代わりに，外側のクラスの<code>private</code>フィールドや<code>private</code>メソッドにアクセスすることが可能です．リスナークラスのようにメソッドの数が少なく，決まったオブジェクトからしか利用されないクラスを定義するのに適しています．
+</p>
+
+<p>
+内部クラスを用いるとこのようなプログラムになりますが，同じようなクラスをボタンの数だけ定義しなくてはならず，すこし面倒です．
+</p>
+
+<p>
+このプログラムの3つのリスナークラス(<code>Button1Listener</code>，<code>Button2Listener</code>，<code>Button3Listener</code>)を1つのクラスにまとめてプログラムを書き直してください．ただし，3つのボタンを処理するリスナークラスを内部クラスとして作るのではなく，<code>ButtonPanel</code>自身に3つのボタンを処理する<code>actionPerformed</code>メソッドを持たせてください．そのためには，次のようにして<code>ButtonPanel</code>で<code>ActionListener</code>インタフェースを実装する必要があります．
+</p>
+
+<pre class="ref">
+class ButtonPanel extends JPanel implements ActionListener {
+</pre>
+
+<p>
+<input class="btn btn-success" type="button" value="ヒントを表示" style="font-size:large;"
+onclick="
+  if (document.getElementById('hide5').style.display == 'block') {
+    document.getElementById('hide5').style.display='none';
+  } else {
+    document.getElementById('hide5').style.display='block';
+  }
+"/>
+</p>
+
+<div id="hide5" style="display: none;">
+<p>
+そうすると，
+</p>
+
+<pre class="ref">
+b1.addActionListener(bl1);
+b2.addActionListener(bl2);
+b3.addActionListener(bl3);
+</pre>
+
+<p>
+と
+</p>
+
+<pre class="ref">
+class Button1Listener implements ActionListener {
+  public void actionPerformed(ActionEvent e) {
+    label.setText("1");
+  }
+}
+class Button2Listener implements ActionListener {
+  public void actionPerformed(ActionEvent e) {
+    label.setText("2");
+  }
+}
+class Button3Listener implements ActionListener {
+  public void actionPerformed(ActionEvent e) {
+    label.setText("3");
+  }
+}
+</pre>
+
+<p>
+は，それぞれ
+</p>
+
+<pre class="ref">
+b1.addActionListener(this);
+b2.addActionListener(this);
+b3.addActionListener(this);
+</pre>
+
+<p>
+と
+</p>
+
+<pre class="ref">
+public void actionPerformed(ActionEvent e) { 
+  if (e.getSource() == b1) {
+    // Button 1に対する処理
+  } else if (e.getSource() == b2) {
+    // Button 2に対する処理
+  } else if (e.getSource() == b3) {
+    // Button 3に対する処理
+  }
+}
+</pre>
+
+<p>
+になります．あとは，<code>actionPerformed</code>メソッドの中身を書いてみましょう．
+</p>
+</div>
+</div>
+
+
+<h3>Swingで独自の部品を作る方法</h3>
+
+<p>
+既存の部品のクラスを継承した新しい部品のクラスを定義することによって，新しい部品を作り出すことが出来ます．それには，基本的に，既存の部品を組合せることによって新しい部品を作り出すことになります．典型的には，新しい部品のクラスのコンストラクタに部品の変更内容を記述します．例えば，練習問題2では，<code>ButtonPanel</code>という新しい部品を<code>JPanel</code>を継承することによって作り出していました．
+</p>
+
+<p>
+しかしながら，SwingのGUI部品を組み合わせるだけでは，折れ線グラフを表示するとか，マウスで絵が描けるといったようなSwingのGUI部品として提供されていない機能を実現することは不可能です．そのためには，自由に直線，円，点などを描画できる<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/Graphics.html"><tt>java.awt.Graphics</tt></a>クラスを使うことが必要になります．この<code>Graphics</code>クラスを使って，GUI画面に自由に描画することによって，新しいGUI部品を作り出すことが可能となります．
+</p>
+
+<p>
+この<code>Graphics</code>クラスを用いて自分で独自の部品を作る際には，通常，<code>JPanel</code>を継承したクラスを新しい部品のクラスとして定義し，その中に描画することによって新しい部品を作ります．
+</p>
+
+<div class="panel panel-info">
+<div class="panel-heading"><b>Graphics2Dクラスについて</b></div>
+<div class="panel-body">
+<code>Graphics</code>クラスよりさらに高機能なクラスとして，<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/Graphics2D.html"><tt>java.awt.Graphics2D</tt></a>クラスがあります．こちらを利用すると，線のギザギザを目立たなくするアンチエイリアシングや図形の回転等，<code>Graphics</code>クラスにはない機能が利用できますので，興味のある人は利用してみてください．
+</div>
+</div>
+
+<p>
+Swingでは，再描画が必要になると部品の<code>paintComponent</code>メソッドが呼び出されるという決まりになっています．そこで，<code>paintComponent</code>メソッドを再定義して自分で作る部品の外観を描画します．その際，通常は，再定義する<code>paintComponent</code>メソッド内で<code>super.paintComponent()</code>と上位クラスの<code>paintComponent</code>メソッドを呼び出すことで既存部品に関わる部分の描画を行います．
+<!--(ただし，SwingのGUI部品をaddした
+だけの場合は，それぞれの部品のpaintComponentが自動的に呼び出されるので，
+再定義は不要．)--> </p>
+
+ <p>
+再描画が必要になるのには，以下の2通りの場合があります．
+</p>
+<ul>
+  <li><p>プログラムの利用者がウィンドウ操作を行なった結果，再描画が必要になる場合．      この場合は，自動的に<code>paintComponent</code>メソッドが呼び出されます．例えば，</p>
+      <ul>
+	<li>プログラムを起動して最初にウィンドウが表示される</li>
+	<li>アイコン化していたウィンドウを元に戻す</li>
+	<li>他のウィンドウを動かしたために，その下に隠れていた部分が前面に現れる</li>
+      </ul>
+      <p>などの場合が挙げられます．</p></li>
+  <li><p>プログラムの中で何らかの状態が変化し，それに伴って自分で作った部品の外観を変化させる必要が生じ，再描画が必要になる場合．この場合は，自動的に<code>paintComponent</code>メソッドが呼び出されませんので，プログラム中で明示的に再描画を行う必要があります．再描画には，<code>paintComponent</code>メソッドを直接呼び出すのではなく，<code>repaint</code>というメソッドを呼び出す決まりになっています．<code>paintComponent</code>メソッドは<code>repaint</code>メソッドから間接的に呼び出されます．</p>
+</ul>
+
+<p>
+以上をまとめると次のようになります．
+</p>
+
+<ul>
+  <li> <a href="http://docs.oracle.com/javase/jp/8/docs/api/javax/swing/JPanel.html"><tt>JPanel</tt></a>を継承する．</li>
+  <li> <code>paintComponent</code>メソッドを再定義し，自分を完全に描画する．通常は，上位クラスの<code>paintComponent</code>メソッドを中から呼び出す．</li>
+  <li> 描画内容が変化したら<code>repaint</code>を呼び出す．</li>
+</ul>
+
+<p>
+まず，最も簡単な部品として，真ん中にオレンジ色の四角形を描くだけの部品を作ってみましょう．サンプルコードは以下のようになります．
+</p>
+
+<pre class="brush: java">
+import javax.swing.*;
+import java.awt.*;
+
+class RectPanel extends JPanel {
+  public void paintComponent(Graphics g) {
+    super.paintComponent(g);
+    g.setColor(Color.ORANGE);
+    g.fillRect(150, 150, 200, 200);
+  }
+}
+class RectFrame extends JFrame {
+  public RectFrame() {
+    this.setTitle("RectFrame");
+    this.setSize(500, 500);
+    this.add(new RectPanel());
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.setVisible(true);
+  }
+  public static void main(String[] args) {
+    new RectFrame();
+  }
+}
+</pre>
+
+<p>
+ここでは，<code>JPanel</code>を継承した<code>RectPanel</code>という新しいクラスを作っています．<code>RectPanel</code>では，<code>JPanel</code>の<code>paintComponent</code>メソッドをオーバライドするメソッドが1つ定義されているだけです．<code>JPanel</code>の<code>paintComponent</code>メソッドは背景色で塗りつぶすだけでしたが，オーバライドして四角形を描画するように変更しています．
+</p>
+
+<pre class="ref">
+public void paintComponent(Graphics g) {
+  super.paintComponent(g);
+  g.setColor(Color.ORANGE);
+  g.fillRect(150, 150, 200, 200);
+}
+</pre>
+
+<p>
+<code>paintComponent</code>は，ユーザが直接呼び出すメソッドではなく，イベント処理の<code>actionPerformed</code>メソッドや<code>mousePressed</code>メソッドのように，ライブラリ側から自動的に呼び出されるメソッドです．ですので，上記の様に引数は<code>Graphics</code>型の値<code>g</code>が一つだけというように決まっています．<code>paintComponent</code>は再描画が必要な時にライブラリ側から自動的に呼び出されます．引数の<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/Graphics.html"><tt>Graphics</tt></a>クラスのオブジェクトには，<code>JPanel</code>オブジェクトのグラフィックコンテキストと呼ばれる描画対象オブジェクトの情報が入っており，この<code>Graphics</code>オブジェクトに対して<code>Graphics</code>クラスのメソッドを使って図形を描画します．
+</p>
+
+<p>
+<code>paintComponent</code>の内部では，まず<code>super.paintComponent(g);</code>で，親クラス，つまり<code>JPanel</code>の<code>paintComponent</code>を呼び出します．一般的にはこのように親クラスの<code>paintComponent</code>を呼び出してやることになっています．
+</p>
+
+<p>
+次に,
+</p>
+
+<pre class="ref">
+g.setColor(Color.ORANGE);
+</pre>
+
+<p>
+で描画する色をオレンジに指定します．<code>Color.ORANGE</code>は，<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/Color.html"><tt>Color</tt></a>クラスの中で定数として定義されています．他にもいろいろな色が定義されています．
+</p>
+
+<pre class="ref">
+g.fillRect(150, 150, 200, 200);
+</pre>
+
+<p>
+は四角形の描画命令です．引数は，<code>JPanel</code>の左上を(0,0)として，(&lt;x座標&gt;, &lt;y座標&gt;, &lt;四角形の横幅&gt;, &lt;四角形の縦の長さ&gt;)の4つを順に指定します．詳しくは，<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/awt/Graphics.html#fillRect-int-int-int-int-"><tt>fillRect</tt></a>メソッドを見てください．
+</p>
+
+<div class="rep">
+<h1>練習問題3</h1>
+
+<p>
+<code>RectPanel</code>を改良しましょう．まず，四角形の色と大きさを両方変えて実行してみてください．
+</p>
+
+<p>
+次に，<code>flllRect</code>メソッドを<code>drawOval</code>，<code>drawLine</code>，<code>drawRect</code>，<code>fillOval</code>など他の図形を描画するメソッドに変更してみましょう．
+</p>
+</div>
+
+<p>
+では，次に描画内容が変化するサンプルを見ていきましょう．このサンプルでは，マウスでクリックするとそこに赤い小さな丸印を付ける，<code>CirclePanel</code>という新しい部品を作り，それを<code>JFrame</code>に張り付けています．
+</p>
+
+<p>
+前のサンプルでは，一度図形が表示されるとその後表示内容が変化することは無いので，<code>repaint</code>メソッドは利用していませんでしたが，今回は実行中に表示内容が変化しますので，<code>repaint</code>メソッドを利用します．まず，実際に実行してみましょう．
+</p>
+
+<tt>CircleFrame.java</tt>
+<pre class="brush: java" id="CircleFrame">
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+    
+class CirclePanel extends JPanel implements MouseListener {
+  private int radius = 5;          // 円の半径
+  private Color color = Color.red; // 円の色
+  private int[] x, y, r;           // すべての丸の位置と半径を記録する配列
+  private Color[] c;               // 丸の色を記録する配列
+  private int num = 0;             // 今まで記録した丸の数
+  final static int MAX = 5000;     // 記録できる丸の最大数 (定数)
+
+  public CirclePanel() {
+    x = new int[MAX];
+    y = new int[MAX];
+    r = new int[MAX];
+    c = new Color[MAX];
+    this.addMouseListener(this);
+  }
+  public void paintComponent(Graphics g) {
+    super.paintComponent(g);
+    for(int i = 0; i < num; i++) {
+      g.setColor(c[i]);
+      g.fillOval(x[i] - r[i], y[i] - r[i], r[i] * 2, r[i] * 2);
+    }
+  }
+  private void addCircle(int x0, int y0) {
+    if (num >= MAX) return;
+    x[num] = x0; y[num] = y0;
+    r[num] = radius; c[num] = color;
+    num++;
+    this.repaint();
+  }
+
+  public void mousePressed(MouseEvent e) {
+    addCircle(e.getX(), e.getY());
+  }
+  public void mouseClicked(MouseEvent e) {}
+  public void mouseReleased(MouseEvent e) {}
+  public void mouseEntered(MouseEvent e) {}
+  public void mouseExited(MouseEvent e) {}
+}
+
+class CircleFrame extends JFrame {
+  private CirclePanel panel;
+  public CircleFrame() {
+    this.setTitle("CircleFrame");
+    this.setSize(500, 500);
+    panel = new CirclePanel();
+    this.add(panel);
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.setVisible(true);
+  }
+
+  public static void main(String[] args) {
+    new CircleFrame();
+  }
+}
+</pre>
+
+<p>
+サンプルプログラムは2つのクラスから成ります．<code>JPanel</code>を継承し，マウスクリックに反応して赤丸を打つ新しい部品である<code>CirclePanel</code>クラス，ならびに，GUIではお馴染の<code>JFrame</code>を継承した<code>CircleFrame</code>クラスです．50行目で，新しい部品の<code>CirclePanel</code>を通常のSwingの部品と同様に<code>add</code>メソッドで<code>JFrame</code>に張り付けています．
+</p>
+
+<pre class="brush: java; first-line: 5;">
+class CirclePanel extends JPanel implements MouseListener {
+</pre>
+
+<pre class="brush: java; first-line: 44;">
+class CircleFrame extends JFrame {
+  private CirclePanel panel;
+  public CircleFrame() {
+    this.setTitle("CircleFrame");
+    this.setSize(500, 500);
+    panel = new CirclePanel();
+    this.add(panel);
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.setVisible(true);
+  }
+</pre>
+
+<h3>マウスイベント処理</h3>
+
+<pre class="brush: java; first-line: 5;">
+class CirclePanel extends JPanel implements MouseListener {
+</pre><p>
+
+<p>
+と書いてあるように，
+マウスが押されたかどうかは，ボタンの場合の<code>ActionListener</code>の代わりに，
+<a
+href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/event/MouseListener.html"><tt>MouseListener</tt></a>インタフェースを利用します．<code>MouseListener</code>インタフェースには以下の5つのメソッドが定義されていますが，ここではマウスが押された時に呼ばれる<code>mousePressed</code>メソッドのみを利用します．インタフェースであるため，5つすべてを実装する必要がり，<code>mousePressed</code>以外は<code>{}</code>のように中身のないメソッドとしておきます．
+</p>
+
+<p>
+マウスの座標値は，<code>MouseEvent</code>オブジェクトの<code>getX()</code>，<code>getY()</code>メソッドで取得可能です．この値を引数にして，<code>CirclePanel</code>内の<code>addCircle</code>メソッドを呼び出して，赤丸の描画を行います．
+</p>
+
+<pre class="brush: java; first-line: 35;">
+public void mousePressed(MouseEvent e) {
+  addCircle(e.getX(),e.getY());
+}
+public void mouseClicked(MouseEvent e) {}
+public void mouseReleased(MouseEvent e) {}
+public void mouseEntered(MouseEvent e) {}
+public void mouseExited(MouseEvent e) {}
+</pre>
+
+<h3>初期設定とコンストラクタ</h3>
+
+<pre class="brush: java; first-line: 5;">
+class CirclePanel extends JPanel implements MouseListener {
+  private int radius = 5;          // 円の半径
+  private Color color = Color.red; // 円の色
+  private int[] x, y, r;           // すべての丸の位置と半径を記録する配列
+  private Color[] c;               // 丸の色を記録する配列
+  private int num = 0;             // 今まで記録した丸の数
+  final static int MAX = 5000;     // 記録できる丸の最大数 (定数)
+
+  public CirclePanel() {
+    x = new int[MAX];
+    y = new int[MAX];
+    r = new int[MAX];
+    c = new Color[MAX];
+    this.addMouseListener(this);
+  }
+</pre>
+
+<p>
+次に<code>CirclePanel</code>のフィールドと，コンストラクタを見てみましょう．フィールドには，円の半径の変数，円の色の変数，すべての赤丸の位置と半径サイズを記録する配列，今まで記録した赤丸の数の変数が用意されています．色は，AWTの<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/Color.html"><tt>Color</tt></a>クラスの定数によって表現します．
+</p>
+
+<p>
+ここで重要なのは，描画した赤丸をすべて<b>再描画</b>できるよう，配列に描画する座標を記録しておくことです．新しい部品を作った場合は，必ず再描画可能(つまり，画面が再現可能)なように，描画したすべての情報を記録しておく必要があります．
+</p>
+
+<p>
+なお，11行目の<code>final static int</code>は整数定数の定義で，記録できる丸の最大数を<code>MAX</code>という名前の定数として定義しています．
+</p>
+
+<p>
+コンストラクタでは，配列の初期化，<code>MouseListener</code>オブジェクトの<code>JPanel</code>への登録を行っています．<code>CirclePanel</code>は<code>MouseListener</code>インタフェースを実装し，かつ，<code>JPanel</code>を継承してますので，両方のオブジェクトの性質を兼ね備えています．ですので，<code>this.addMouseListener(this);</code>とすることで，<code>JPanel</code>に<code>MouseListener</code>オブジェクトを登録します．これがないと，マウスを押しても何も反応しませんので，忘れないように注意しましょう．
+</p>
+
+<h3><tt>paintComponent</tt></h3>
+
+<pre class="brush: java; first-line: 20;">
+public void paintComponent(Graphics g) {
+  super.paintComponent(g);
+  for(int i = 0; i < num; i++) {
+    g.setColor(c[i]);
+    g.fillOval(x[i] - r[i], y[i] - r[i], r[i] * 2, r[i] * 2);
+  }
+}
+</pre>
+
+<p>
+続いて，<code>paintComponent</code>です．<code>paintComponent</code>は，ユーザが直接呼び出すメソッドではなく，イベント処理の<code>actionPerformed</code>メソッドや<code>mousePressed</code>メソッドのようにライブラリ側から自動的に呼び出されるメソッドです．ですので，20行目の様に引数は<code>Graphics g</code>と決まっています．<code>paintComponent</code>は再描画が必要な時にライブラリ側から自動的に呼び出されます．引数の<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/Graphics.html"><tt>Graphics</tt></a>クラスのオブジェクトには，<code>JPanel</code>オブジェクトのグラフィックコンテキストと呼ばれる描画対象オブジェクトの情報が入っていて，この<code>Graphics</code>オブジェクトに対して，<code>Graphics</code>オブジェクトのメソッドを使って図形を描画します．
+</p>
+
+<p>
+まず，21行目では，上位クラスの<code>paintComponent</code>を呼び出しています．
+</p>
+
+<p>
+次に，for文を使ってすべての丸を繰り返し描画しています．23行目で丸の色をセットし，24行目の
+<a
+href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/Graphics.html#fillOval-int-int-int-int-"><tt>fillOval</tt></a>メソッドで円を外接する四角形を指定することによって，描画しています．
+クリックした位置を中心とする円を描画したいので，始点を
+<code>(x[i] - r[i], y[i] - r[i])</code>として，横幅と縦幅(つまり，直径)を<code>r[i] * 2</code>と指定しています．これを丸の数<code>num</code>だけ繰り返し実行します．
+</p>
+
+<h3><tt>addCircle</tt></h3>
+
+<pre class="brush: java; first-line: 27;">
+private void addCircle(int x0, int y0) {
+  if (num >= MAX) return;
+  x[num] = x0; y[num] = y0;
+  r[num] = radius; c[num] = color;
+  num++;
+  this.repaint();
+}
+</pre>
+
+<p>
+最後に，マウスが押されたときのイベント処理メソッド<code>mousePressed</code>から呼び出される<code>addCircle</code>について説明します．28行目では座標を記録する配列の個数が<code>MAX</code>個なので，すでに<code>MAX</code>個以上記録されているときはこれ以上，丸を記録しません．29行目で，配列に円の中心位置を記録．30行目で半径と色を記録します．31行目で円の個数を1個増加させます．
+</p>
+
+<p>
+最後に32行目で，<code>this.repaint()</code>と呼び出しています．これを呼び出すことによって，<code>JPanel</code>が再描画されます．実際には，<code>paintComponent</code>が呼び出されることになります．直接，描画命令を呼ぶのではなく，<code>repaint</code>で<code>paintComponent</code>を呼び出すことによって，間接的に描画しています．これが，Swingにおける自由な図形の描画の流儀です．
+</p>
+
+<p>
+<code>CircleFrame</code>の説明は以上です．それでは，これを<code>CombiPanel</code>に張り付け，色の変更と円だけでなく，四角も書けるようにしてみましょう．
+</p>
+
+<!------------------------------------------------->
+<div class="rep">
+<h1>練習問題4</h1>
+
+<p>
+<code>CirclePanel</code>を拡張しましょう．まずは，色を赤以外の色に変更できるようにしましょう．さらに，円の大きさも変えられるようにしましょう．
+まず，
+</p>
+
+<pre class="brush: java; first-line: 6;">
+private int radius = 5;          // 円の半径
+private Color color = Color.red; // 円の色
+</pre>
+
+<p>
+の値を変更する<code>void setRadius(int r)</code>メソッド，<code>void setPanelColor(Color c)</code>メソッドを<code>CirclePanel</code>クラスに追加して下さい．
+</p>
+
+<p>
+次に，<code>CombiFrame</code>のサンプルコードを参考に <code>CircleFrame</code>(<code>CirclePanel</code>ではないことに注意)の左右に色選択ボタン，半径選択ボタンを追加しましょう．とりあえず，色は3色，半径は5と10の2通りで構いません．なお，半径はボタンでなく，<code>JTextField</code>で直接数値を入力できるようにするのでも構いません．
+</p>
+
+<p>
+練習問題2を参考に，それぞれのボタンを処理可能な<code>actionPerformed</code>を
+実装しましょう．<code>actionPerformed</code>は，<code>CircleFrame</code>に追加します．
+<code>CircleFrame</code>に以下のように<code>ActionListener</code>を実装して下さい．
+</p>
+
+<pre class="ref">
+class CircleFrame extends JFrame implements ActionListener {
+</pre>
+
+<p>
+<code>actionPerformed</code>中では，<code>setRadius</code>や<code>setPanelColor</code>を呼び出して下さい．たとえば，黄色ボタンが押された時には，
+</p>
+
+<pre class="ref">
+panel.setPanelColor(Color.YELLOW);
+</pre>
+
+<p>
+を実行すればよいでしょう．また，忘れずに，各ボタンについて，
+</p>
+
+<pre class="ref">
+button1.addActionListener(this);
+</pre>
+
+<p>
+を実行して下さい．これがないとボタンを押しても反応が起こりません．
+</p>
+
+<p>
+以上，まとめると以下の作業になります．
+</p>
+<ul>
+<li><code>CirclePanel</code>クラスへの<code>setRadius</code>，<code>setPanelColor</code>メソッドの追加</li>
+<li><code>CircleFrame</code>へのボタンの追加</li>
+<li><code>CircleFrame</code>クラスへのボタン処理の<code>actionPerformed</code>メソッドの追加</li>
+<li>各ボタンに対し，<code>addActionListener</code>を実行</li>
+</ul>
+
+<div class="panel panel-primary">
+<div class="panel-heading"><b>発展課題</b></div>
+<div class="panel-body">
+色の種類や円の大きさの種類を増やしてみましょう．
+</div>
+</div>
+</div>
+
+<!------------------------------------------------->
+<div class="rep">
+<h1>練習問題5</h1>
+
+<p>
+次に，<code>CirclePanel</code>の動作を少し変更してみましょう．今までは，クリックする度に赤丸を描画していましたが，これでは絵を描こうとすると何度もクリックしなくてはいけなくて右手の指が疲れてきてしまいます．そこで，マウスをドラッグすると連続的に点を描画できるようにしてみましょう．
+</p>
+
+<p>
+ドラッグのイベント処理は，<code>MouseListener</code>ではなく，別の<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/event/MouseMotionListener.html"><tt>MouseMotionListener</tt></a>インタフェースを利用します．<code>MouseMotionListener</code>インタフェースには<code>mouseDragged</code>と<code>mouseMoved</code>の2つのメソッドが書かれています．
+</p>
+
+<p>
+ここでは，<code>mouseDragged</code>のイベントが起こった時の処理を<code>mousePressed</code>と全く同じように行います．
+</p>
+
+<pre class="ref">
+public void mouseDragged(MouseEvent e) {
+  /* mousePressed と同じ処理 */
+}
+public void mouseMoved(MouseEvent e) { }
+</pre>
+
+<p>
+さらに，5行目のクラス定義の先頭の実装インタフェースに<code>MouseMotionListener</code>を追加します．
+</p>
+
+<pre class="ref">
+class CirclePanel extends JPanel
+    implements MouseListener, MouseMotionListener {
+</pre>
+
+<p>
+さらに18行目の後に<code>addMouseMotionLister</code>を忘れずに追加しましょう．これがないとドラッグイベントを処理することができません．
+</p>
+
+<pre class="ref">
+this.addMouseMotionListener(this);
+</pre>
+</div>
+
+<!--
+<h2>継承の続き</h2>
+<p>
+今回では，前回の「オブジェクト指向」の
+話の続きを説明します．前回の後半では，「継承」「インタフェース」
+について学びました．そして，最後には，「インタフェース型の変数」
+「親クラス型の変数」にそれぞれ，インタフェースを実装したクラスのオブジェ
+クト，親クラスを継承した子クラスのオブジェクトが代入できることを
+説明しました．
+</p>
+<p>
+今回はまず，「親クラス型の変数」に子クラスのオブジェクトを代入した場合に，
+親と子のどちらのメソッドが呼ばれるかを学んで，オブジェクト指向の中で唯一
+まだ説明していなかった重要な概念である「ポリモーフィズム」について
+説明していきます．
+</p>
+<p>
+さらに，Javaの基本事項で，まだ説明していなかった，
+キャスト，コレクションとジェネリクス，
+staticフィールドとメソッド について説明します．
+さらに，知っていると便利な，可変長の配列であるArrayList
+クラスについても説明します．
+</p>
+<p>
+最後にGUIについても，少しだけ説明します．
+今回はタイマーを使った簡単なアニメーションです．
+</p>
+次回は，ファイル出力(ストリーム出力)，ネットワークを学びます．
+お絵かきプログラムの拡張(始点，終点), 
+ファイル出力(描画内容の出力(画像,ストリーム)) (サンプルのみ), 
+ネットワーク(サーバとクライアント) (サンプルのみ) (ポート番号とマシン名)
+
+
+
+<h3>親クラスと子クラスのどちらのメソッドが呼ばれるか？</h3>
+<p>前々回は「継承」「インターフェース」の話をしました．
+最後に，親クラスの型の変数に継承した子クラスのオブジェクトを代入できるという話をしたと思います．
+また，同様にインタフェースの型の変数にそのインタフェースをimplementsしたクラスのオブジェクトを
+代入できるという話もしました．
+</p>
+<p>
+では今回は，そのように親クラスの型の変数に子クラスのオブジェクトを代入していた場合，
+メソッドの呼び出しはどうなるかを勉強しましょう．
+</p>
+<p>
+親クラスSと子クラスCがあり，
+どちらでもf()というメソッドを定義しているとしましょう．
+すなわち，子クラスでf()を再定義(オーバーライド)したというわけです．
+</p>
+<p>
+プログラムは以下の様になります．</p>
+<pre class=ref>
+  class S {
+    void f() { /* 省略 */ }
+  }
+  class C extends S {
+    void f() { /* 省略 */ }
+  }
+</pre><p>
+というわけです．
+</p><p>
+そうすると，
+<p>
+<pre class=ref>
+  S s = new S();
+  s.f();
+</pre>
+<p>
+というのがあれば，これは，親クラスのf()が呼び出されます．
+</p><p>
+一方，</p>
+<pre class=ref>
+  C c = new C();
+  c.f();
+</pre><p>
+ならば，子クラスのf()が呼び出されます．
+ここまでは問題ありません．</P.
+<p>
+さて，</p>
+<pre class=ref>
+  S s = new C();
+  s.f();
+</pre><p>
+の場合はどうでしょうか．
+sという変数の型は親クラスSなので，s.f()は
+親クラスのf()が呼び出されるような気もします．
+一方，sという変数に入っているオブジェクトは，
+new C()で作った子クラスCのオブジェクトなので，
+そのf()を呼ぶということは，
+子クラスのf()が呼び出されるような気もします．
+</p>
+<p>
+変数の型に基づいて呼び出すメソッドを決めるのか，
+その変数に入っている実際のオブジェクトの型に基づいて
+メソッドを決めるのかという違いです．
+</p><p>
+Javaでは，後者です．
+すなわち，
+<font color=red><b>
+変数の型ではなく，実際に入っているオブジェクトの型に基づいてメソッドを決めます．</B></font>
+</p><p>
+オブジェクト指向では，オブジェクト自身が
+自分の振る舞いを決めるというのが自然なので，
+変数の型ではなく，実際のオブジェクトによって
+メソッドが決まる方が自然なのです．
+</p><p>
+ここで，少し複雑な例を考えてみましょう．
+</p><pre class=ref>
+  class S {
+    void f() { /* 省略 */ }
+    void g() {
+      f();  // ★
+    }
+  }
+  class C extends S {
+    void f() { /* 省略 */ }
+  }
+</pre>
+<p>
+g()というメソッドが親クラスで定義されていて，
+その中の★でf()を呼び出しているとします．
+</p><p>
+まず，
+</p><pre class=ref>
+  S s = new S();
+  s.g();
+</pre>
+<p>
+という場合には，★では親クラスSのf()が呼び出されます．
+これは問題ないでしょう．
+</p><p>
+ところが，
+</p>
+<pre class=ref>
+  S c = new C();
+  c.g();
+</pre>
+<p>とした場合，★では子クラスCのf()が呼び出されます．
+</p><p>
+c.g()で呼び出した場合，cには子クラスのオブジェクトが入っています．
+その中でf()を呼び出す場合，
+それはあくまで，子クラスオブジェクトc のf()を呼び出すことになります．
+</p><p>
+親クラスSのプログラムだけを見ていると，
+その中の★の部分は，当然，自分のメソッドを呼び出すように思えてしまいます．
+それが実際には，変数cの中身が子クラスのオブジェクトである場合は，
+子クラスのメソッドを呼び出すことになります．
+</p><p>
+g()は，親クラスで定義されてはいるけれど，
+継承して，
+子クラスで定義されているのと同じになっていると考えても結構です．
+子クラスで定義されているのとまったく同じだとすれば，
+子クラスのオブジェクトに対してg()を呼び出せば，
+その中のf()が子クラスのf()になるのも納得できるでしょう．
+</p>
+<p class="sub">
+あるいは，f()の前には，自分自身のオブジェクトを指し示すthisが省略されていて，
+this.f()なのだと考えても結構です．
+c.g()で呼び出した場合，
+thisには子クラスオブジェクトが入っているので，
+子クラスのf()を呼び出すことになります．
+</p>
+<p>
+上で説明した
+「親クラスで定義されているメソッドの中から
+子クラスのメソッドが呼び出されることがある」
+という仕組みは，
+プログラムの再利用という観点からは，大きな意味を持っています．
+</p><p>
+親クラスの定義は変更しない（つまり，プログラムを作り直さない，再コンパイルもしない）
+のに，子クラスを新たに定義し，そこでf()を再定義するだけで，
+親クラスで定義したメソッドg()の動作が変更できます．
+すなわち，親クラスで定義されたメソッドの動作を，
+親クラスのプログラムを変更することなく
+カスタマイズできるわけです．
+この結果，プログラムを柔軟に再利用できることになります．
+</p><p>
+この，変数の型ではなく，
+実際のオブジェクトの中味によって，呼び出されるメソッドが決まる性質のことを 
+<font color=red><b>ポリモーフィズム (polymorphism, 多態性)</b></font> といいます．
+</p>
+<p>
+実は，前回のpaintComponentメソッドのオーバーライドや，(これは継承でなくて，インタフェースですが)
+ボタンを押した時の処理のactionPerformedメソッドもも，このポリモーフィズムを利用してライブラリから
+ユーザが定義したメソッドを呼び出すことによって，ライブラリの振る舞いをユーザが変更可能に
+なっていました．</p>
+
+<div class=rep>
+<h1>練習問題6
+&nbsp;&nbsp;
+<INPUT type="button" value="解答提出" onClick="answer(3,6)" style="font-size:large;">
+</h1>
+<p>次のプログラムを実行すると，何がプリントされるでしょうか．</p>
+<ol>
+  <li>まず，実行せずに何がプリントされるか予想してください．
+  <li>実際に実行してみて，予想とあっているかチェックしてください．
+  <li>なぜそのようにプリントされるのか説明してください．
+</ol>
+
+<pre class="brush: java; first-line: 1;">
+class TestPolymorph {
+  public static void main(String[] args) {
+    A a; B b; C c;
+    a = new A(); a.g();
+    b = new B(); b.g();
+    c = new C(); c.g();
+    a = new B(); a.g();
+    a = new C(); a.g();
+  }
+}
+
+class A {
+  public void f1() {
+    System.out.println("f1 A");
+  }
+  public void f2() {
+    System.out.println("f2 A");
+  }
+  public void g() {
+    f1();
+    f2();
+  }
+}
+
+class B extends A {
+  public void f1() {
+    System.out.println("f1 B");
+  }
+}
+
+class C extends B {
+  public void f2() {
+    System.out.println("f2 C");
+  }
+}
+
+// ソースコードは 6code.zip の中に入っています．
+</pre>
+</div>
+
+<div class=rep>
+<h1>練習問題7
+&nbsp;&nbsp;
+<INPUT type="button" value="解答提出" onClick="answer(3,7)" style="font-size:large;">
+</h1><p>
+<a href="http://docs.oracle.com/javase/jp/1.5.0/api/java/io/PrintStream.html#println(java.lang.Object)">System.out.println</a>は，オブジェクトを渡すと，そのオブジェクトのtoStringメソッドを呼び出して，
+文字列に直してプリントします．
+toString
+は<a href="http://docs.oracle.com/javase/jp/1.5.0/api/java/lang/Object.html">Objectクラス</a>で定義されているので，
+実はどのオブジェクトでも使えます．(Objectクラスは，すべてのクラスの大元の祖先でしたね．)</p>
+<p>
+まず，次のプログラムはどのようにプリントされるでしょうか．
+(ヒント: オンラインマニュアルでObjectクラスのtoStringの説明を見てみましょう．)
+</p>
+<pre class="brush: java; first-line: 1;">
+  class ToStringTest1 {
+    public static void main(String[] args) {
+      A1 a = new A1();
+      System.out.println(a);
+    }
+  }
+
+  class A1 {
+  }
+</pre>
+<p>
+また，次のプログラムはどのようにプリントされるでしょうか．</p>
+<pre class="brush: java; first-line: 1;">
+  class ToStringTest2 {
+    public static void main(String[] args) {
+      A2 a = new A2();
+      System.out.println(a);
+    }
+  }
+
+  class A2 {
+    public String toString() {
+      return "Hey, I'm class A2";
+    }
+  }
+</pre>
+<p>
+変更したのはクラスAのプログラムです．System.out.printlnのプログラムはまったく変更していないのに，
+System.out.printlnの動作が変わりました．これはなぜでしょうか．
+</p>
+</div>
+
+
+<h3>キャストとinstanceof</h3>
+<p>
+代入のところで説明したように，
+あるクラスの変数に，実際にはそのクラスのサブクラスのオブジェクトが
+セットされている場合があります．
+</p>
+<p>
+例えば，
+</p>
+<pre class=ref>
+  Object o = "abc";
+</pre>
+<p>
+という場合，Object型の変数oに，ObjectのサブクラスであるStringクラスの
+オブジェクトがセットされています．
+</p>
+<p>
+このように，変数の型とオブジェクトの型が異なる場合があるので，
+これを実行時に変換したり，調べたりする機能が用意されています．
+</p>
+<p>
+実行時に型を変換する機能をキャストと言います．
+例えば，
+</p>
+<pre class=ref>
+  Object o = "abc";
+  String s;
+  s = o;
+</pre>
+<p>
+というプログラムはコンパイルエラーになります．
+なぜなら，Object型の変数oの内容をString型の変数sに
+入れることはできないからです．
+しかし，実際にはoにはString型のオブジェクトが入っているので，
+本当は代入しても大丈夫なはずです．
+</p>
+<p>
+そこで，次のように書きます．
+</p>
+<pre class=ref>
+  Object o = "abc";
+  String s;
+  s = (String)o;
+</pre>
+<p>
+Object型のoに入っているオブジェクトを(String)でStringに変換して
+sに代入するというわけです．
+(String)のように，前にクラスの名前を書いて
+変換することをキャストと言います．
+</p>
+<p>
+キャストを行なうと実行時に変換ができるかどうかを
+テストします．
+上の例ではたまたま実際に入っているオブジェクトがStringだったので，
+実行時にエラーは出ませんが，
+</p>
+<pre class=ref>
+  Object o = new Integer(100);
+  String s;
+  s = (String)o;
+</pre>
+<p>
+というような場合は，実行時にキャストできないという例外が発生します．
+</p>
+<p>
+キャストはコンパイル時ではなく，実行時にエラーになるので，
+なるべく使わない方がよいですが，
+時には必要になります．
+</p>
+<p>
+次は，実行時にオブジェクトの型を調べるinstanceofです．
+例えば，
+</p>
+<pre class=ref>
+  Object o = "abc";
+  if (o instanceof String) {
+    System.out.println("String");
+  } else {
+    System.out.println("Not String");
+  }
+</pre>
+</p>
+というプログラムは，「String」と表示されます．
+このように，instanceofで，
+oがStringのインスタンスであるかどうかを調べることができます．
+</p>
+<p>
+キャストを使うときに，instanceofと組み合わせれば，
+実行時エラーを防ぐことができます．
+こんな感じです．
+</p>
+<pre class=ref>
+Object o = "abc";
+String s;
+if (o instanceof String) {
+    s = (String)o;
+    ...
+}
+</pre>
+-->
+
+<h2>コレクションとジェネリクス</h2>
+
+<p>
+Javaには，可変長配列<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/util/ArrayList.html"><tt>ArrayList</tt></a>をはじめとして，スタック<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/util/Stack.html"><tt>Stack</tt></a>，ハッシュ<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/util/HashMap.html"><tt>HashMap</tt></a>，優先度キュー<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/util/PriorityQueue.html"><tt>PriorityQueue</tt></a>など，型を限定しない汎用データクラスが多数存在しています．これらの汎用データクラスは<em>コレクション(collection)</em>と呼ばれます．なお，汎用データクラスは<code>java.util</code>パッケージに属しているため，使うためにはプログラムの最初に<code>import java.util.*;</code>が必要です．忘れないようにしましょう．
+</p>
+
+<div class="panel panel-info">
+<div class="panel-heading"><b>補足説明</b></div>
+<div class="panel-body">
+<p>
+可変長配列<code>ArrayList</code>は，配列(array)とリスト(list)の中間的な性質を持っています．<code>ArrayList</code>では，データは配列に記録されており，データの数が配列の要素数と同じになると，自動的に内部で使われている配列が拡大されます．ですので，配列と違って事前に最大の要素数を与える必要がありません．そういう意味で，リストのように使うことが可能です．リストでもあるので，配列の途中にデータを挿入する<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/util/ArrayList.html#add-int-E-"><tt>add</tt></a>メソッドや，途中のデータを削除する<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/util/ArrayList.html#remove-int-"><tt>remove</tt></a>メソッドもあります．ただし，1つずつデータをずらすことを内部で行うため，データが大量にある場合にインデックスの最初の方の要素を挿入・削除すると時間が掛かることがあります．
+</p>
+
+<p>
+頻繁に挿入・削除を行う場合は，リストによって実現された可変長配列<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/util/LinkedList.html"><tt>LinkedList</tt></a>を使うべきです．使い方は同じですが，内部はリストで表現されていますので，挿入・削除はリンクのつなぎ替えだけで実現できます．ただし，データを順番に取り出すような操作が多い場合は，リンクをたどるオーバヘッドがあるので，配列によって実現された<code>ArrayList</code>の方が高速に処理できます．このように利用の仕方によって，使い分けることが重要です．
+</p>
+
+<p>
+可変長配列には，他にも<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/util/Vector.html"><tt>Vector</tt></a>があります．こちらは内部の実装に配列を使っていて，<code>ArrayList</code>とほとんど同じですが，<code>Vector</code>はJava 1.0から存在する古いクラスで，一般には<code>ArrayList</code>の利用が推奨されています．本授業では<code>ArrayList</code>の方を用いることにします．
+</p>
+</div>
+</div>
+
+<p>
+こうしたコレクションクラスでは，ユーザが扱うデータ型を自由に指定することができるようになっています．それが，<em>ジェネリクス(generics)</em>と呼ばれる記述の仕方です．C++のテンプレートとほぼ同じで，以下のようにクラス名の後に<code>&lt;データのクラス名&gt;</code>をつけて利用します．オンラインマニュアルで<code>E</code>と書かれている箇所が，<code>&lt;</code>と<code>&gt;</code>で囲まれた型に置き換えられます．なお，データの型にはクラスしか指定できないため，<code>int</code>や<code>double</code>などの基本データ型の場合には，対応する<em>ラッパークラス(wrapper class)</em>を利用する必要があります．ラッパークラスについては，<a href="#primitive">次節</a>で説明します．
+</p>
+
+<pre class="brush: java;">
+import java.util.*;
+
+class TestArrayList {
+  public static void main(String[] args) {
+    ArrayList&lt;String> a;
+    a = new ArrayList&lt;String>();
+    a.add("abc");
+    a.add("bcd");
+    a.add("cde");
+    for (int i = 0; i < a.size(); i++) {
+      String s = a.get(i);
+      System.out.println(s);
+    }
+  }
+}
+</pre>
+
+<p>
+5行目で<code>ArrayList</code>クラス型の変数を宣言します．<code>ArrayList</code>などのコレクションはジェネリクスを使っているため，必ずデータ構造に代入するクラスの型を <code>&lt;データのクラス名&gt;</code>として指定する必要があります．6行目は，<code>ArrayList</code>型のオブジェクトを生成します．ここでも，<code>ArrayList</code>の後に<code>&lt;データのクラス名&gt;</code>を付ける必要があります．とりあえず，<code>ArrayList&lt;データのクラス名&gt;</code>で一つのクラス名と考えてしまっても差し支えないでしょう．
+</p>
+
+<p>
+7, 8, 9行目の<code>add</code>メソッドの呼出しで，<code>ArrayList</code>オブジェクトに文字列を追加します．次に，11行目の<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/util/ArrayList.html#get-int-"><tt>get</tt></a>メソッドの呼出しで，i番目(先頭は0番目)の文字列を取り出します．この<code>get</code>メソッドの返り値の型は，ジェネリクスで指定したクラスの型になります．ここでは，<code>String</code>ですので，<code>String</code>型の変数<code>s</code>に代入しています．
+</p>
+
+<p>
+  なお，10行目で呼び出している<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/util/ArrayList.html#size--"><tt>size</tt></a>メソッドは，<code>ArrayList</code>の要素数を返します．<code>get</code>で指定できるインデックス番号は，配列と同様，0〜<要素数>-1となります．
+</p>
+
+<p>
+このように<code>ArrayList</code>クラスは最初に配列の大きさを決める必要がなく，可変長配列として利用することができます．実際には配列を用いて実現されていますが，内部構造はオブジェクト指向によってカプセル化されているため，ユーザは知る必要はありません．名前に<code>List</code>が付いていることから分かるように，リスト的な性質も持ち合わせているので，挿入位置のインデックス番号を第一引数に指定する<code>add</code>メソッドで配列の途中に要素を挿入したり，<code>remove</code>メソッドで途中の要素を削除したりすることができます．
+</p>
+
+<!--<p>ジェネリクスはJava5 (JDK1.5)から導入された比較的新しいJavaの文法です
+が，同時に<B>「拡張for文」</b>というものも導入されました．
+「拡張for文」を利用することによって，10〜11行目
+<pre class="brush: java; first-line: 10;">
+     for (int i = 0; i &lt; a.size(); i++) {
+       String s = a.get(i);
+</pre>
+<p>
+は以下のように書くことができます．</p>
+<pre class="brush: java; first-line: 10;">
+     for (String s: a) {
+</pre>
+<p>
+このように書くことで，ArrayList型のオブジェクト aに入っているすべての
+要素が sに1つずつ代入されて，要素の数だけforループが実行されます．
+sizeやgetメソッドを使わずに簡単に記述できるようになっています．</p>
+<p>なお「拡張for文」は，ArrayList以外のコレクションクラスの汎用データク
+ラスに加えて，通常の配列に対して利用することも可能です．</p>-->
+	
+<h3>基本データ型とラッパークラス</h3>
+
+<p>
+先ほど説明した<code>ArrayList</code>などのジェネリクスを利用したコレクションでは，扱えるデータ型がクラスに限定されていました．
+</p>
+
+<p>
+先ほどのサンプルは<code>String</code>型でクラスでしたので問題ありませんでしたが，<code>int</code>型の整数や<code>double</code>型の数値など，あらかじめJavaに用意されている基本データ型はクラスではないため，ジェネリクスで指定することができません．そのため，Javaでは，<code>int</code>，<code>double</code>などのすべての基本データ型に対応するラッパークラスが存在しています．以下に基本データ型と対応するラッパークラスを示します．
+</p>
+
+<div id="primitive" class="table-responsive">
+<table class="table table-bordered table-striped">
+<!-- <table border="1" cellpadding="5"> -->
+<tr><th colspan="3">基本データ型</th><th>ビット幅</th><th>値の範囲</th><th>ラッパークラス</th></tr>
+<tr> <td rowspan="7">数値</td><td rowspan="4">整数</td><td><tt>byte</tt></td><td>8</td><td>-128 〜 +127</td>
+<td><a href="http://docs.oracle.com/javase/jp/8/docs/api/java/lang/Byte.html"><tt>Byte</tt></a></td>
+</tr>
+<tr>  <td><tt>short</tt></td><td>16</td><td>-32768 〜 +32767</td><td><a href="http://docs.oracle.com/javase/jp/8/docs/api/java/lang/Short.html"><tt>Short</tt></a></td>
+</tr>
+<tr>  <td><tt>int</tt></td><td>32</td><td>-2147483648 〜<br/> +2147483647</td><td><a href="http://docs.oracle.com/javase/jp/8/docs/api/java/lang/Integer.html"><tt>Integer</tt></a></td>
+</tr>
+
+<tr>  <td><tt>long</tt></td><td>64</td><td>-9223372036854775808 〜 +9223372036854775807</td><td><a href="http://docs.oracle.com/javase/jp/8/docs/api/java/lang/Long.html"><tt>Long</tt></a></td>
+</tr>
+<tr> <td>文字</td><td><tt>char</tt></td><td>16</td><td>0 〜 65535</td><td><a href="http://docs.oracle.com/javase/jp/8/docs/api/java/lang/Character.html"><tt>Character</tt></a></td>
+</tr>
+<tr> <td rowspan="2">浮動小数点</td><td><tt>float</tt></td><td>32</td><td>±3.40282347E+38 〜<br/> ±1.40239846E-45</td><td><a href="http://docs.oracle.com/javase/jp/8/docs/api/java/lang/Float.html"><tt>Float</tt></a></td>
+</tr>
+<tr>  <td><tt>double</tt></td><td>64</td><td>±1.79769313486231570E+308 〜 ±4.94065645841246544E-324</td><td><a href="http://docs.oracle.com/javase/jp/8/docs/api/java/lang/Double.html"><tt>Double</tt></a></td>
+</tr>
+<tr><td colspan="2">真偽値</td><td><tt>boolean</tt></td><td align="center">-</td><td>true / false</td><td><a href="http://docs.oracle.com/javase/jp/8/docs/api/java/lang/Boolean.html"><tt>Boolean</tt></a></td>
+</tr>
+</table>
+</div>
+
+<p>
+先程の<code>ArrayList</code>のサンプルコードを，<code>String</code>の代わりに整数値を扱うように少し変更してみましょう．<code>ArrayList</code>ではプリミティブ型は直接扱えないので，代わりに<code>int</code>型のラッパークラスの<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/lang/Integer.html"><tt>Integer</tt></a>クラスを利用します．
+</p>
+
+<p>
+整数値を<code>Interger</code>オブジェクトに変換して<code>ArrayList</code>に格納し，<code>ArrayList</code>から取り出した<code>Interger</code>オブジェクトを整数値に逆変換して再度利用します．<code>Interger</code>オブジェクト同士の演算はサポートされていませんので，注意してください．<code>Interger</code>オブジェクトは，コンストラクタで生成します．
+</p>
+
+<pre class="brush: java;">
+import java.util.*;
+
+class TestBoxing {
+  public static void main(String[] args) {
+    int sum = 0;
+    ArrayList&lt;Integer> a = new ArrayList&lt;Integer>();
+    a.add(10);
+    a.add(100);
+    a.add(1000);
+    for (int i = 0; i < a.size(); i++) {
+      int v = a.get(i);
+      sum += v;
+    }
+    System.out.println(sum);
+  }
+}
+</pre>
+
+<p>
+ジェネリクスを使うコレクションクラスで基本データ型を使うには，上記の様に，<code>&lt;クラス名&gt;</code>のクラス名にラッパー型のクラス名を書きます．あとは，通常の配列を使うように，<code>add</code>の引数に基本データ型の変数もしくは定数を指定し，<code>get</code>の返り値は基本データ型の変数に代入することができます．ですので，ラッパークラスを意識するのは，6行目のコレクションクラスの変数を宣言し，そのオブジェクトを生成する場合のみです．(実際には，以下の補足説明で述べるように，オートボクシング機能によって基本データ型とラッパーオブジェクトの相互変換が自動的に行われるようになっています．)
+</p>
+
+<div class="panel panel-info">
+<div class="panel-heading"><b>補足説明</b></div>
+<div class="panel-body">
+<p>
+古いJava(JDK1.4までのJava)では，ラッパークラスをジェネリクスを用いたコレクションクラスで利用する場合には，明示的にラッパーオブジェクトを生成し，明示的にラッパーオブジェクトを基本データ型に変換してやる必要がありました．例えば，<code>int</code>型の定数<code>100</code>をラッパーオブジェクトにするには，コンストラクタを用いて<code>new Integer(100)</code>とする必要があり，逆に<code>Integer</code>型のラッパーオブジェクト<code>obj</code>を整数値に戻すには<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/lang/Integer.html#intValue--"><tt>intValue</tt></a>メソッドを利用して，<code>obj.intValue()</code>とする必要がありました．
+</p>
+
+<p>
+Java5(JDK1.5)以降では，<em>オート・ボクシング(auto boxing)</em>と<em>オート・アンボクシング(auto unboxing)</em>によって，ラッパークラスオブジェクトと基本データ型の間の変換は自動的に行われます．コレクションクラスにデータを渡すときに直接引数に基本データ型を記述して，受け取るときには基本データ型に代入することが可能になっています．ジェネリクスで<code>Interger</code>クラスを指定した場合，<code>int</code>型の引数を渡すと内部では自動的に<code>Integer</code>オブジェクトが生成されます．逆に，<code>Integer</code>型のオブジェクトの返り値を<code>int</code>型の変数に代入すると，自動的に<code>int</code>型の基本データ型の数値に変換されます．
+</p>
+</div>
+</div>
+
+<div class="rep">
+<h1>練習問題6 (提出してください)</h1>
+
+<p>
+1日目の<a href="1.html#lesson"><tt>Lesson</tt></a>クラスはある決まった数までしか学生を追加できませんでした．これは，固定長の配列で<code>Student</code>オブジェクトを管理していたためです．では，この人数制限をなくすように改良してみましょう．そのためには，可変長配列の<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/util/ArrayList.html"><tt>ArrayList</tt></a>クラスを用いて<tt>Student</tt>オブジェクトを管理する必要があります．どのように変更したら良いか考えてみてください．</p>
+
+<input class="btn btn-success" type="button" value="ヒント1" style="font-size:large;"
+       onclick="
+  if (document.getElementById('hide6').style.display == 'block') {
+    document.getElementById('hide6').style.display='none';
+  } else {
+    document.getElementById('hide6').style.display='block';
+  }
+"/>
+
+<div id="hide6" style="display: none;">
+<pre class="ref">
+private Student[] st;
+</pre>
+
+<p>
+をまず<code>ArrayList</code>に書き換えます．<code>Student</code>クラスを使うので，
+<code>ArrayList&lt;Student></code>ですね．さらに，
+</p>
+
+<pre class="ref">
+st = new Student[max];
+</pre>
+
+<p>
+も書き換える必要があります．さらにもう一つ，<code>Lesson</code>クラスの<code>add</code>メソッドの中身
+</p>
+
+<pre class="ref">
+   st[num++] = s; 
+</pre>
+
+<p>
+も<code>ArrayList</code>のデータ追加メソッドの<code>add</code>を使うように変更しましょう．
+</p>
+</div>
+
+<p>
+さて，メソッド<code>add(Student s)</code>をさらに改良して，
+<code>add</code>した結果が常に学籍番号の小さい順に並ぶようにしましょう．
+ただし，<code>Student</code>クラスには，学籍番号を外部から取得できるよう，
+<code>getId</code>メソッド
+</p>
+
+<pre class="ref">
+public String getId() {
+  return id;
+}
+</pre>
+
+<p>
+を追加して下さい．
+</p>
+
+<input class="btn btn-success" type="button" value="ヒント2" style="font-size:large;"
+       onclick="
+  if (document.getElementById('hide10').style.display == 'block') {
+    document.getElementById('hide10').style.display='none';
+  } else {
+    document.getElementById('hide10').style.display='block';
+  }
+"/>
+
+<div id="hide10" style="display: none;">
+<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/util/ArrayList.html#get-int-"><tt>get</tt></a>で0番目から順番に<code>Student</code>オブジェクトを取得して，<code>getId</code>メソッドで各<code>Student</code>オブジェクトの学籍番号を調べ，新規に登録する<code>Student</code>オブジェクトの学籍番号と比較します．文字列の比較には，<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/lang/String.html"><tt>String</tt></a>クラスの<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/lang/String.html#compareTo-java.lang.String-"><tt>compareTo</tt></a>メソッドを用いて比較します．例えば，<code>String</code>型のオブジェクト<code>a</code>と<code>b</code>を比較する場合には，<code>a.compareTo(b)</code>とします．C言語の<code>strcmp</code>関数と同じで，辞書順で a &lt; bなら負の数，a == b なら0，a &gt; b なら正の数が返されます．
+</p>
+
+<p>
+新規登録する<code>Student</code>オブジェクトのフィールド<code>id</code>よりも，大きいフィールド<code>id</code>の値をもつ<code>Student</code>オブジェクトが見付かったら，そのオブジェクトの位置に<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/util/ArrayList.html#add-int-E-">引数が2つの<tt>add</tt></a>メソッドで新しい<code>Student</code>オブジェクトを挿入します．
+そうすると，元々入っていたオブジェクトはインデックス番号が一つ後ろに変わり，以降のデータもすべて1つずつ後ろにずれます．</p>
+<input class="btn btn-success" type="button" value="もっとヒントが欲しい人ためのヒント" style="font-size:large;"
+       onclick="
+  if (document.getElementById('hide7').style.display == 'block') {
+    document.getElementById('hide7').style.display='none';
+  } else {
+    document.getElementById('hide7').style.display='block';
+  }
+"/>(まずは自力で考えてみてから押しましょう)
+</p>
+
+<div id="hide7" style="display: none;">
+<p>
+上で延べたように，<code>Student</code>の配列をまずは<code>ArrayList&lt;Student></code>に置き換えます．
+次に<code>Lesson</code>クラスの<code>add</code>を書き換えます．単純に新しく追加する<code>Student</code>オブジェクトを
+<code>ArrayList</code>の最後に追加していくなら，以下のようになります．
+</p>
+
+<pre class="ref">
+public void add(Student s) {
+  st.add(s);
+  num++; 
+}
+</pre>
+
+<p>
+<code>add</code>した結果が常に学籍番号の小さい順に並ぶようにするためには，
+新規登録する<code>Student</code>オブジェクトのフィールド<code>id</code>よりも，大きいフィールド<code>id</code>の値をもつ<code>Student</code>オブジェクトが見つかったら，そのオブジェクトの位置に引数が2つの<code>add</code>メソッドで新しい<code>Student</code>オブジェクトを挿入すればいいので，
+</p>
+
+<pre class="brush: java;">
+public void add(Student s) {
+  String id0 = s.getId();
+  num++;
+  for(int i = 0; i < st.size(); i++) {
+    Student s0 = st.get(i);
+    if (id0.compareTo(s0.getId()) < 0){ // id0より大きいIDを発見
+      // ★ 引数が2つのaddで，i番目にsを挿入
+      return;
+    }
+  }
+  // ★ id0が一番大きい場合は，通常のaddを実行
+}
+</pre>
+
+<p>
+となります．後は2箇所の<code>★</code>を穴埋めして下さい．
+</p>
+</div>
+</div>
+
+<p>
+なお，<code>ArrayList</code>クラスを使う場合は，AWTやSwingなどと同様に，プログラムの最初にimport文が必要です．<code>ArrayList</code>クラスは<code>java.util</code>パッケージに属するので，<code>import java.util.*;</code>をプログラムの先頭に追加するのを忘れないようにしましょう．
+</p>
+</div>
+
+<h3>継承とコレクションを使ったGUIサンプルプログラム</h3>
+
+<p>
+では，今まで学んだ継承とコレクションをGUIプログラミングに応用してみましょう．複数の種類の図形を画面上に描画する時に，これらの継承とコレクションを組み合わせて利用することでプログラムが簡潔に表現できます．
+</p>
+
+<p>
+では，赤い丸と青い正方形を画面上にランダムに表示するプログラムを考えてみましょう．
+</p>
+
+<p>
+前回学んだように，再描画のために描いた図形はすべて記録しておく必要があります．
+その場合，1つの図形の情報(x座標，y座標，大きさ)を1つのクラスで表現すると便利です．
+ここでは，<code>Figure</code>クラスを以下の様に定義してみます．
+</p>
+
+<pre class="brush: java;">
+class Figure {
+  protected int x, y, size;
+  Figure() {
+    x = (int)(Math.random() * 450);
+    y = (int)(Math.random() * 450);
+    size = (int)(Math.random() * 30 + 20);
+  }
+  void draw(Graphics g) {}
+}
+</pre>
+<p>
+このクラスは継承を前提とします．つまり，実際にはこれを継承した赤丸を描画する<code>Circle</code>クラスと，青の正方形を描画する<code>Box</code>クラスを作成し，それらを使います．
+</p>
+
+<p>
+<code>Figure</code>クラスには，まず<code>Box</code>，<code>Circle</code>で共通して利用する情報(x座標，y座標，大きさ)を，継承したクラスからも参照できるよう<code>protected</code>なフィールドとして宣言します．
+</p>
+
+<p>
+次に，コンストラクタでランダムに座標とサイズを決定します．なお，<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/lang/Math.html#random--"><tt>Math.random()</tt></a>メソッドは<code>double</code>型を返すため，C言語と同様に<code>(int)</code>でキャストして<code>int</code>型の数値に変換しています．
+</p>
+
+<p>
+メソッド<code>draw</code>は，<code>Circle</code>，<code>Box</code>でオーバライドすることとして，
+中身が空のメソッド<code>void draw(Graphics g) {}</code>として定義しておきます．
+<code>draw</code>は，<code>paintComponent</code>中で実際に図形を描画するため，
+<code>Graphics g</code>が引数として渡されます．
+</p>
+
+<p>
+次は，<code>Circle</code>クラスと<code>Box</code>クラスです．
+</p>
+
+<pre class="brush: java; first-line: 11;">
+class Circle extends Figure {
+  void draw(Graphics g) {
+    g.setColor(Color.RED);
+    g.drawOval(x, y, size, size);
+  }
+}
+
+class Box extends Figure {
+  void draw(Graphics g) {
+    g.setColor(Color.BLUE);
+    g.drawRect(x, y, size, size);
+  }
+}
+</pre>
+
+<p>
+図形の位置，サイズのランダムの生成は<code>Figure</code>のコンストラクタで行なうため，子クラスで記述する必要があるのは，<code>draw</code>メソッドの中身だけです．それぞれ，色を<code>setColor</code>メソッドでセットして，<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/Graphics.html#drawOval-int-int-int-int-"><tt>drawOval</tt></a>メソッドと<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/Graphics.html#drawRect-int-int-int-int-"><tt>drawRect</tt></a>メソッドで，図形を描画します．
+</p>
+
+<p>
+これで，<code>Figure</code>，<code>Circle</code>，<code>Box</code>が完成です．あとは，<code>Figure</code>型の<code>ArrayList</code>に図形(<code>Circle</code>もしくは<code>Box</code>)を次々と追加して，<code>JPanel</code>を継承したクラスの<code>paintComponent</code>から<code>draw</code>を呼べば，色々な大きさの赤い円や青い四角形が表示されます．
+</p>
+
+<p>
+では，残りの部分を見てみましょう．
+</p>
+
+<pre class="brush: java; first-line: 24;">
+class RandomPanel extends JPanel {
+  private final static int NUM = 50; // 定数の定義
+  private ArrayList&lt;Figure> fig;
+  RandomPanel() {
+    fig = new ArrayList&lt;Figure>();
+    for (int i = 0; i < NUM; i++){
+      fig.add(new Box());
+      fig.add(new Circle());
+    }
+  }
+  public void paintComponent(Graphics g) {
+    super.paintComponent(g);
+    for (int i = 0;i < fig.size(); i++) {
+      Figure f = fig.get(i);
+      f.draw(g); 
+    }
+  }
+}
+</pre>
+<p>
+ここでは配列の代わりに<code>Figure</code>型の<code>ArrayList</code>を
+使っています．コンストラクタでは，まず<code>ArrayList&lt;Figure></code>オブジェクト生成し，
+それに<code>Box</code>オブジェクトと<code>Circle</code>オブジェクトを交互にそれぞれ50個ずつ<code>add</code>しています．
+</p>
+
+<p>
+<code>paintComponent</code>では，前回と同様にforループで次々に記録した図形を描画しています．
+<!-- ここでは，通常のfor文の代わりに<b>拡張for文</b>を用いて，<code>fig</code>の全要素の
+drawメソッドを呼び出します．
+fig.get(i).draw(i) は，fig.get(i) で i番目のFigureオブジェクトを取り出して，
+そのオブジェクトのメソッドのdrawを g を引数として呼び出すという意味になります．
+この様にメソッドが連続する場合は，左から評価しますので，(fig.get(i)).draw(i) と
+等価になりますので，覚えておきましょう．-->
+</p>
+
+<p>
+ここでは，<code>Figure</code>型のローカル変数<code>f</code>に取り出されたオブジェクトが<code>Circle</code>と<code>Box</code>のどちらであっても<code>draw</code>メソッドを呼び出しますが，実際にはそれぞれのオブジェクトのクラスに対応したメソッドが呼ばれることになります．
+</p>
+
+<p>
+共通するフィールドやメソッドを持った<code>Figure</code>クラスを定義して，具体的な図形はそれを継承して<code>draw</code>メソッドのようなそれぞれに特有の動作が必要なメソッドのみをオーバライドする．さらに，それを<code>ListArray</code>に記録する．<code>paintComponent</code>で次々に<code>draw</code>を呼び出すと，個々の子クラスの<code>draw</code>が呼び出される．以上が，継承とコレクションを活用したGUIプログラミングの典型例となります．
+</p>
+
+<p>
+なお，<code>main</code>メソッドを含む<code>Frame</code>の定義は以下の様になります．
+</p>
+
+<pre class="brush: java; first-line: 43;">
+class RandomFrame extends JFrame {
+  public RandomFrame() {
+    this.setTitle("Random Frame");
+    this.setSize(500, 530);
+    this.add(new RandomPanel());
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.setVisible(true);
+  }
+  public static void main(String[] args) {
+    new RandomFrame();
+  }
+}
+</pre>
+
+<div class="rep">
+<h1>練習問題7</h1>
+
+<p>
+上記の<code>RandomFrame</code>のプログラムを理解してから，以下の両方を行なって下さい．
+</p>
+
+<ul>
+<li>図形を追加する．
+<a
+href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/Graphics.html#drawLine-int-int-int-int-"><tt>drawLine</tt></a>メソッドを2回もしくは3回用いて×か△，もしくは両方を追加して下さい．</li>
+<li>色の設定をランダムにする．事前に用意した5色程度の中から選びましょう．</li>
+</ul>
+
+<p>
+<input class="btn btn-success" type="button" value="ランダムに色を選ぶ方法のヒント" style="font-size:large;"
+onclick="
+  if (document.getElementById('hide8').style.display == 'block') {
+    document.getElementById('hide8').style.display='none';
+  } else {
+    document.getElementById('hide8').style.display='block';
+  }
+"/>
+<div id="hide8" style="display: none;">
+<p>
+まず，色は<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/Color.html"><tt>Color</tt></a>クラスの中で定数として定義されていますので，ここから5種類くらい選びましょう．
+</p>
+
+<p>
+次に，<code>Figure</code>クラス中で，配列定数を
+</p>
+
+<pre class="ref">
+private final static Color[] cl =
+  {Color.RED, Color.BLUE, Color.GREEN, Color.BLACK};
+</pre>
+
+<p>
+の様に定義します．
+</p>
+
+<p>
+さらに，<code>Figure</code>クラスに色情報を記録するための
+<code>Color</code>クラスのインスタンス変数を追加する必要があります．
+次の一行を<code>Figure</code>クラスに追加しましょう．
+</p>
+
+<pre class="ref">
+protected Color color;
+</pre>
+
+<p>
+この変数に<code>Figure</code>のコンストラクタでランダムに色を設定します．具体的には，
+</p>
+
+<pre class="ref">
+color = cl[(int)(Math.random() * cl.length)];
+</pre>
+
+<p>
+とします．<code>cl.length</code>は配列<code>cl</code>の要素数を表します．
+</p>
+</div>
+</div>
+<!---->
+
+<!--
+<hr>
+<H2>アニメーション (発展的内容)</H2>
+<H3>java.awt.event.timer クラスの利用</h3>
+
+<p><B>(「アニメーション」に関しては，発展的内容ですので，
+ここまでの課題が遅れている人は取り組まなくて構いません．
+レポート課題の内容にも直接関係ありません．)</B></p>
+
+<p>では，最後にGUIでアニメーションを実現する方法を説明して，終わりにしましょう．
+アニメーションができれば，Javaでオリジナルのシューティングゲームを作るのも
+そう難しくはないでしょう．</p>
+</p>
+<p>
+Javaでのアニメーションの実現にはいろいろな方法がありますが，最も簡単なのは，
+Swing
+(javax.swingパッケージ)
+に含まれる
+<a href="http://docs.oracle.com/javase/jp/1.5.0/api/javax/swing/Timer.html">
+Timerクラス</a>を利用することです．
+</p>
+<p>
+Timerクラスではイベントを指定した間隔で発生させます．
+つまり，インターバルタイマーです．
+イベントの処理は，
+JButtonなどと同じで，actionListenインターフェースを実装したオブジェクトのactionPerformedメソッドで
+行います．つまり，ほとんど既に習った内容でできるということです．</p>
+
+<p>では，サンプルコードを見てみましょう．
+このプログラムでは，黒い丸が左上から右下に移動していくという
+アニメーション表示を行います．まずは，実行してみてください．</p>
+
+<pre class="brush: java;">
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+class MovingPanel extends JPanel implements ActionListener {
+  private Timer timer;
+  private int x,y;
+  MovingPanel(){
+    x=0; y=0;
+    timer = new Timer(10, this); // 10ミリ秒毎にactionPerformedを呼び出し
+    timer.start(); // タイマーをスタート．一度，スタートすると，stopメソッドを
+                   // 呼ぶまでactionPerformedが定期的に呼ばれ続けます．
+  }
+  public void paintComponent(Graphics g) {
+    super.paintComponent(g);
+    g.fillOval(x,y,10,10);
+  }
+  public void actionPerformed(ActionEvent e){
+    x++; y++;
+    if (x>490) timer.stop(); // 端まで移動したら終了．
+    this.repaint();   
+  }
+}
+
+class MovingFrame extends JFrame {
+    public MovingFrame(){
+      this.setTitle("Random Frame");
+      this.setSize(500,530);
+      this.add(new MovingPanel());
+      this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      this.setVisible(true);
+    }
+    public static void main(String[] args) {
+      new MovingFrame();
+   }
+}
+</pre>
+<p>
+まず，JPanelを継承するところは同じですが，ボタンなどの
+イベント処理と同様に ActionListenerをimplementsします．
+</p>
+<pre class="brush: java; first-line: 5;">
+class MovingPanel extends JPanel implements ActionListener {
+</pre><p>
+とします．
+次に，フィールドに
+</p>
+<pre class="brush: java; first-line: 6;">
+  private Timer timer;
+  private int x,y;
+</pre><p>
+として，Timer型の変数と，黒丸の位置を表すint型のx,yを記述します．
+さらにコンストラクタでは，
+</p>
+<pre class="brush: java; first-line: 8;">
+  MovingPanel(){
+    x=0; y=0;
+    timer = new Timer(10, this); // 10ミリ秒毎にactionPerformedを呼び出し
+    timer.start(); // タイマーをスタート．一度，スタートすると，stopメソッドを
+                   // 呼ぶまでactionPerformedが定期的に呼ばれ続けます．
+  }
+</pre><p>
+x,yを初期化した後，
+<a href="http://docs.oracle.com/javase/jp/1.5.0/api/javax/swing/Timer.html">Timerクラス</a>
+のオブジェトを生成します．引数では，
+何ミリ秒ごとにイベントを発生させるかと，イベント処理をするactionPerformedを
+するActionListenerをimplementsしたリスナークラスのオブジェクトを指定します．この場合は，
+MovingPanelオブジェクトがリスナーオブジェクトを兼ねているので，thisを指定します．
+addActionListenerと同じ様な感じです．
+Timerオブジェクトを生成しただけでは，timerはスタートしません．
+start()メソッドを呼び出してやる必要があります．start()メソッドを
+呼び出すと，定期的なactionPerformedの呼び出しがスタートします．
+</p><p>
+続いて paintComponent です．
+paintComponentでは，単にフィールドのx,y座標を
+使って，直径10の黒円を描画するだけです．
+</p>
+<pre class="brush: java; first-line: 14;">
+  public void paintComponent(Graphics g) {
+    super.paintComponent(g);
+    g.fillOval(x,y,10,10);
+  }
+</pre><p>
+そして，actionPerformedメソッドです．
+</p>
+<pre class="brush: java; first-line: 18;">
+  public void actionPerformed(ActionEvent e){
+    x++; y++;
+    if (x>490) timer.stop(); // 端まで移動したら終了．
+    this.repaint();   
+  }
+</pre><p>
+actionPerformedはtimerによって10ミリ秒毎に呼び出されます．
+ここでは，x, yともに+1して，
+端まで移動したかどうかをx>490をチェックすることに
+よって行います．x>490が満たされたら，
+timer.stop() によってタイマーをストップします．
+逆にいうと，stopするまでは，永久に10ミリ秒間隔で
+actionPerformedが呼ばれ続けます．
+最後に，黒丸の位置を変更したので，this.repaint() で
+再描画を実行します．
+</p>
+<p>
+これでアニメーションの完成です．
+まとめると，
+</p>
+<UL>
+<LI>Timerのオブジェクトの生成とスタート．
+<LI>actionPeformedで，描画図形の位置を変更して，repaintを呼び出し．
+これを定期的に繰り返す．終了条件に達したら，stopでタイマーを停止．
+</UL>
+<p>
+ということになります．
+</p>
+
+<div class=rep>
+<h1>練習問題10 (自由課題，提出は任意)
+&nbsp;&nbsp;
+<INPUT type="button" value="解答提出" onClick="answer(3,10)" style="font-size:large;">
+</h1>
+<p>
+<a href="3.html#4">3回目の練習問題4</a>を改良して，自動的に1秒間隔で(永久に)
+おみくじボタンが押されるようにしましょう．
+</p>
+<p>【ヒント】
+コンストラクタの public HelloLabelFrame()の中で，
+timerオブジェクトを生成して，startしましょう．
+stopしないので，たったそれだけです．
+</p>
+</div>
+
+<div class=rep>
+<h1>練習問題11 (自由課題，提出は任意)
+&nbsp;&nbsp;
+<INPUT type="button" value="解答提出" onClick="answer(3,11)" style="font-size:large;">
+</h1>
+<p>
+RandomFrameのサンプルプログラムを改良して，
+描画した図形が下に落ちるアニメーションを表示するように
+しましょう．呼び出す間隔は各自調整してみてください．</p>
+<p>
+なお，java.utilにもTimerクラスがあるので，
+java.util.* と javax.swing.* をインポートする場合は，
+単に　Timer と書いても候補が2つあるためにエラーになりますので，
+javax.swing.Timer timer; のようにクラス名の前にパッケージ名をつけて書くか，
+import java.util.*; の代わりに，
+import java.util.ArrayList; としてください．
+<p>【ヒント】
+Figureクラスには，次のfallメソッドを追加しましょう．</p>
+<pre class=ref>
+  void fall() { y++; }
+</pre>
+<p>
+そして，actionPerformedの中で，定期的にすべてのFigureの
+fall()を呼び出してから，repaintしましょう．<BR>
+<p>イベント処理のパッケージが必要ですので，
+import java.awt.event.*; を忘れないようにしましょう．
+</p>
+</div>
+<HR>
+<HR>
+<!------------------------------------------------- 
+<div class=rep>
+<h1>練習問題12 (自由課題，提出は任意)
+&nbsp;&nbsp;
+<INPUT type="button" value="解答提出" onClick="answer(3,12)" style="font-size:large;">
+</h1>
+<P class="sub">
+(これ以降の自由問題では，あえて簡単なヒントしか出しませんので，あとは各自，
+Webやオンラインマニュアルや本などで調べてみてください．
+GUI部品の使い方を自力で調べて，実際に使えるようになることは，
+プログラミングにおいては大変重要な能力の一つです．ですので，
+授業ではすべてのGUI部品を一つずつ説明することはしません．
+Web上にはサンプルコードがたくさんあるので参考にしましょう．
+GUI部品の使い方を自力で調べられるようになれば，
+様々なGUI部品を組み合わせて自由なGUIをデザインすることが
+できるようになるでしょう．
+<BR>
+もし，どうしても分からない場合は，
+<a href="/pro/trouble.html">質問アドレス</a>
+を利用して下さい．)
+</p>
+<p>
+HTMLファイルで背景色を指定する場合には，
+<pre class=ref>
+&lt;body bgcolor="#ffffff"&gt;
+</pre><p>
+のように，赤，緑，青の値を16進でそれぞれ2桁ずつ，合計6桁で指定します．
+この色の指定をサポートするツール
+ColorChooser を作りましょう．
+</p><p>
+具体的には次のようなツールを考えます．
+</p>
+<ul>
+  <li>スライダー（もしくはスクロールバー）を3本用意し，赤，緑，青に対応させます．
+  <li>スライダー（もしくはスクロールバー）を動かすと，赤，緑，青の値を0から255まで変化させることができます．
+  <li>赤，緑，青の値を変化させると，
+      それに応じて，表示される色と16進で表示される赤，緑，青の値が変化します．
+</ul>
+</p>
+<p>以下，このプログラムを作るのに必要になることを説明します．
+</p><p>
+Swingでは，色はAWTの
+  <a href="http://docs.oracle.com/javase/jp/1.5.0/api/java/awt/Color.html">
+Colorクラス</a>のオブジェクトを利用して表します．
+</p><p>
+Colorオブジェクトは，赤，緑，青の3原色の強さを
+0から255の整数で指定して作ります．
+例えば，赤を表すColorオブジェクトは，</p>
+<pre class=ref>
+Color red = new Color(255,0,0);
+</pre><p>
+で作ります．
+コンストラクタの引数は，赤，緑，青の順です．</p>
+<p>
+また，いくつかの代表的な色については，
+すでに定数としてColorオブジェクトが用意されています．
+の先頭の方のField Summaryというところにリストアップされている色です．
+これらの色は，Colorクラスのクラス変数に代入されているので，
+クラス名とクラス変数名を指定して，次のようにして使うことができます．</p>
+<pre class=ref>
+Color c = Color.pink;
+</pre>
+<p>
+さて，いろいろな色を表示するPanelを次のように作ってみました．</p>
+<pre class="brush: java;">
+class ColorPanel extends JPanel {
+    public ColorPanel() {
+        this(Color.white);
+    }
+    public ColorPanel(Color c) {
+        setColor(c);
+        setPreferredSize(new Dimension(200,150));
+    }
+    public void setColor(Color c) {
+        setBackground(c);
+    }
+    public Color getColor() {
+        return getBackground();
+    }
+}
+</pre><p>
+ColorPanelは，
+  <a href="http://docs.oracle.com/javase/jp/1.5.0/api/javax/swing/JSlider.html">
+JPanel</a>を継承して作ってあります．
+指定された色を背景色にしています．</p>
+<p>
+このColorPanelを次のように使ってみます．</p>
+<pre class="brush: java;">
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+
+class ColorFrame extends JFrame {
+    public ColorFrame(){
+      Color initColor = Color.pink;
+      ColorPanel c = new ColorPanel(initColor);
+      this.setTitle("TestFrame");
+
+      this.add(c,BorderLayout.CENTER);
+      this.pack();
+      this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      this.setVisible(true);
+    }
+    public static void main(String[] args) {
+      new ColorFrame();
+    }
+}
+</pre><p>
+これを実行すると，ピンクが表示されます．
+色の表示は，このColorPanelでできるでしょう．
+</p><p>
+16進の表示は，JTextFieldを使ってください．
+</p><p>
+残るはスライダー（またはスクロールバー）ですが，
+<a href="http://docs.oracle.com/javase/jp/1.5.0/api/javax/swing/JSlider.html">
+JSlider</a>
+という部品を使います．
+<a href="http://docs.oracle.com/javase/jp/1.5.0/api/javax/swing/JScrollBar.html">
+スクロールバー(JScrollBar)</a>もありますので，こちらを使ってもかまいません．
+</p><p>
+スライダーを動かすと，
+<a href="http://docs.oracle.com/javase/jp/1.5.0/api/javax/swing/event/ChangeListener.html">
+ChangeListener</a>のstateChanged
+メソッドが呼び出されます．これは，swingであたらしく追加されたイベントなので，
+import javax.swing.event.*; をプログラムの最初に書く必要があります．
+</p>
+<p>ボタンやマウスのイベント処理と同様に，
+ChangeListenerインターフェイスをimplementsしたクラスを作り，
+そのオブジェクトをJSliberに登録します．
+そうすると，スライダーを動かした時に，
+stateChangedが呼び出されるので，
+そのメソッドの中で，現在のスライダーの位置に応じて，
+ColorPanelの色，および16進の表示を変更するようにします．
+現在の値，値のセットを行うには，それぞれ，getValue(), setValue()メソッドを利用します．
+</p><p>
+Scrollbarは，作るときに，最大値，最小値を指定できるので，
+赤，緑，青の値の範囲に合わせて，0から255に指定しておくと簡単です．</p>
+<pre class=ref>
+    JSlider sl=new JSlider(JSlider.HORIZONTAL,0,255,0);
+    sl.setPaintTicks(true);
+    sl.setMajorTickSpacing(50);
+    sl.setMinorTickSpacing(10);
+    sl.setLabelTable(sl.createStandardLabels(50));
+    sl.setPaintLabels(true);
+</pre><p>
+とすれば10毎にしるし(tick)や50毎に数値ラベルを付けることができます．
+</p><p>
+部品をどのように配置するかなどのユーザインターフェイスのデザインは，
+自由に行なってください．
+例えば，
+<a href="ColorChooser20.gif">
+こんな感じ</a>や，
+<a href="ColorChooser21.gif">
+こんな感じ</a>です．
+レイアウトには，JPanelをうまく組み合わせてください．または，
+GridLayoutやGridBagLayoutでもかまいません．
+</p><p>
+ユーザインターフェイス以外にも，いろいろ機能を拡張したければ，
+自由に拡張してください．
+例えば，どのスライダーが赤，緑，青なのかわからないと不親切なので，
+少なくともred,green,blueというLabelくらいは付けてあげた方がよいでしょう．
+他にフォントの大きさを変えたりすると
+<a href="ColorChooser30.gif">
+こんな感じ</a>になります．他にも終了ボタンを付けたり，色を記憶しておく
+ボタンなどを付けるなど，余裕のある人は自由に拡張してください．</p>
+
+<p>あたりまえですが，
+ <a href="http://docs.oracle.com/javase/jp/1.5.0/api/javax/swing/JColorChooser.html">
+JColorChooserクラス</a>を<a href="ColorChooser1.gif">利用する</a>のは，NGです．</p>
+
+</div>
+
+<HR>
+<div class=rep>
+<h1>練習問題13 (自由課題，提出は任意)
+&nbsp;&nbsp;
+<INPUT type="button" value="解答提出" onClick="answer(3,13)" style="font-size:large;">
+</h1>
+<p>
+今日の感想があれば書いて下さい．
+理解が難しかった箇所などがあったら，書いてください．
+</p>
+</div>
+-->
+<hr>
+<I>電気通信大学 情報理工学部 情報・通信工学科 5学期 MICS実験第一 資料</i>
+</body> </html>

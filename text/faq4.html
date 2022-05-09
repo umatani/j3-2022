@@ -1,0 +1,272 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML//EN">
+<html> <head>
+<!-- (C)2011 K.Yanai (UEC) -->
+<meta name="robots" content="noindex,nofellow">
+<meta http-equiv="Content-Type" content="text/html; CHARSET=UTF-8">
+<title>J3課題 第4回目 FAQ</title>
+<link href="https://fonts.googleapis.com/css?family=Lato:400,700|Noto+Sans+JP:400,700" rel="stylesheet">
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="../oop-new.css" type="text/css">
+</head>
+
+<body>
+<h1>J3課題 第4回目 FAQ</h1>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+<div class="alert alert-danger" role="alert">
+  <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+  <span class="sr-only">Warning:</span>
+  以下，昨年度以前の講義資料に基づく古いFAQが含まれていますが，<a href="4.html#final-report">J3レポート課題</a>で色々な機能追加を工夫する際に有用な情報と思われるため，そのまま残してあります．
+</div>
+
+<!-- <p><span class=b>以下は昨年度までの質問です．今年度のFAQは順次追加していきます．</span></p> -->
+<!--
+<h2>Q. JColorChooser で色選択のダイヤログを表示すると文字が□で表示されて文字化けするようです．</h2>
+<p>
+CEDのJavaの日本語フォントの設定が正しくされていなくてSwingのGUIでは日本語がうまく表示されない
+ようです．とりあえず，以下のように言語設定を英語にするとJColorChooserのダイヤログ中の文字
+がすべて英字になるので，うまく表示されると思います．
+</p>
+<pre class=ref>
+setenv LANG en
+(bash の場合は LANG=en)
+</pre>
+<p>
+できるだけ早くCEDのJavaの日本語フォントの設定を修正するようにしたいと思います
+．現在，管理者に対応を依頼中です．(⇒ 対応してくれたようです. (2010/05/19))
+</p>
+<HR>
+-->
+<h2>Q. 書いた図形を保存しておきたいと思います．ファイルに書き出すにはどうすればいいでしょうか？</h2>
+
+<p>
+2通りあります．描画した図形の情報(ストローク情報)をファイル出力する方法と，画面(ビットマップ情報)をJPEGなどの画像ファイルとして出力する方法です．前者ではファイル出力された図形を再度読み込んで，図の描画を途中から再開することが可能です．ただし，ファイルは独自形式になります．後者では，JPEG形式で画像を出力すれば，様々な別のソフトでも利用可能になります．ただし，個々の図形の情報は失われてしまっているので，図を修正することは難しいでしょう．ですので，ストローク形式でのファイル入出力機能と，画像形式でのファイル入出力機能の両方があるのが望ましいでしょう．
+</p>
+
+<ol>
+<li><code>ArrayList</code>クラス型の<code>figures</code>変数の内容を全て出力します．オブジェクトの中身をファイル出力するのは，「オブジェクトのシリアライズ化」を行えば，簡単に行なうことができます．<a href="http://legacy.techscore.com/tech/J2SE/IO/4.html">ここ</a>や<a href="http://legacy.techscore.com/tech/J2SE/IO/4-2.html">ここ</a>を見てみましょう．<code>ArrayList</code>クラスは，<code>Serializable</code>インタフェースを実装しているので，簡単にファイル出力が可能です．なお，ストロークデータのファイル入出力の例は<code>Dog</code>クラスになっていますが，ここを全図形を記録している<code>ArrayList</code>オブジェクトに変更するだけでOKです．
+</li>
+<li><code>JPanel</code>に描画する代わりに<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/awt/image/BufferedImage.html"><tt>BufferedImage</tt></a>オブジェクトに描画して，<a href="https://docs.oracle.com/javase/jp/8/docs/api/javax/imageio/ImageIO.html"><tt>ImageIO</tt></a>オブジェクトの<a href="https://docs.oracle.com/javase/jp/8/docs/api/javax/imageio/ImageIO.html#write-java.awt.image.RenderedImage-java.lang.String-java.io.File-"><tt>write</tt></a>メソッドを使ってファイル出力が可能です．例えば，<a href="http://kamifuji.dyndns.org/JSupport/JAVA_Java2D/Java2DTest/index.html">ここ</a>などの情報を参考にしましょう．
+</li>
+</ol>
+
+<h2>Q. Javaでのファイル操作の仕方がわかりません．何かメソッドなどが定義されているのですか？</h2>
+
+<p>
+A. <a href="File.java">ファイル入出力の例</a>を用意しました．ついでに<a href="https://docs.oracle.com/javase/jp/8/docs/api/javax/swing/JFileChooser.html">ファイル選択ダイアログ(<tt>JFileChooser</tt>)</a>の<a href="FileChooser.java">使い方の例</a>も示します．
+</p>
+
+<h2 id="jmenu">Q. メニューバーやツールバーの使い方が良く分かりません．</h2>
+
+<p>
+A. <a href="https://docs.oracle.com/javase/jp/8/docs/api/javax/swing/JMenuBar.html">
+<tt>JMenuBar</tt></a>の<a href="jmenu.java.txt">サンプルソースコード</a>と
+<a href="https://docs.oracle.com/javase/jp/8/docs/api/javax/swing/JToolBar.html"><tt>JToolBar</tt></a>の<a href="jtoolbar.java.txt">サンプルソースコード</a>を用意したので，参考にしてください．(漢字が文字化けする場合は，ブラウザの漢字コードをeuc-jpに設定してみてください．)
+</p>
+
+<p>
+ついでに，<a href="TestDialog.java.txt">ダイアログボックス</a>の使用例も載せました．</p>
+
+<p>他の部品のサンプルはネットで探しましょう．今やネットで探す能力もプログラミング能力の一部です．例えば，<a href="http://www.google.co.jp/search?q=jcombobox+%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB">「JComboBox サンプル」</a> を見てみてください．
+</p>
+
+<h2>Q. パネルに描画したグラフィックですが，描画された状態で，そのパネルの座標を指定して，そのピクセルの色情報を取得する方法はありますでしょうか?</h2>
+
+<p>
+他のやり方もあると思いますが1つの方法として，パネルからイメージを取得して，取得したイメージから<code>getRGB</code>メソッドを使って色情報を取得して下さい．サンプルコードを付けておきます．
+</p>
+
+<pre class="ref">
+public Color getColor(int x, int y) {
+  int w = drawPanel.getWidth(), h = drawPanel.getHeight();
+  BufferedImage image =
+    new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+  Graphics2D g = image.createGraphics();
+  drawPanel.printAll(g); // ドローパネルをイメージにペイント
+  g.dispose(); // 解放
+  return new Color(image.getRGB(x, y));
+}
+</pre>
+
+<P style="text-align: right;">
+(answered by E.Dachiku 2010/04/26)　　
+</p>
+
+<h2>Q. 「無名クラス」とは何ですか？</h2>
+
+<p>
+イベント処理を行う場合に一つのボタンにいちいち一つずつクラスを作っていては面倒です．他のボタンと共用する手もありますが，それ以外に簡易的にクラスを作る方法があります．それが，<em>無名クラス(もしくは匿名クラス)(anonymous class)</em>という，クラス名を持たないクラスのことです．<a href="3.html#HelloLabel">3回目の<tt>HelloLabelFrame</tt></a>を無名クラスを使って書き換えると次のようになります．
+</p>
+
+<pre class="ref">
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+class HelloLabelFrame extends JFrame { 
+  <font color=red>// implements ActionListener が不要になりました</font>
+  private JLabel label;
+
+  public HelloLabelFrame() {
+    this.setSize(300, 200);
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    JButton b = new JButton("Hello");
+    this.add(b, BorderLayout.SOUTH);
+    label = new JLabel(" ", JLabel.CENTER);
+    this.add(label, BorderLayout.CENTER);
+    <font color=red>b.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ev) {
+        label.setText("Hello !");
+      }
+    });</font>
+    this.setVisible(true);
+  }
+  public static void main(String[] args) {
+    new HelloLabelFrame();
+  }
+}
+</pre>
+
+<p>
+無名クラスは
+</p>
+
+<pre class="ref">
+<継承する親のクラス名またはインタフェース名>() {
+  // メソッド定義
+}
+</pre>
+
+<p>
+です．これはオブジェクトですから，次の様に親クラスの型の変数に代入することももちろん可能です．
+</p>
+
+<pre class="ref">
+ActionListener al = new ActionListener() {
+  public void actionPerformed(ActionEvent e) {
+    label.setText("Hello !");
+  }
+};
+button1.addActionListener(al);
+button2.addActionListener(al);
+</pre>
+
+<p>
+何でもかんでもこれで済ませてしまうのは，プログラムが読みにくくなるのでやめた方がいいですが，上記の例のように単純な処理しかしない場合は簡潔に書けるので便利です．
+</p>
+
+
+<h2>Q. 私はボタンを使おうと思っているのですが，どんな操作でも一度はコントロールに渡す必要があるのでしょうか？スクロールはバー操作はビュー内で完結するし，ボタンの場合直接モデルに対して処理できるので，コントロールを通すのは少し面倒な気がします．</h2>
+<p>
+A. 実際のプログラミングでは，VとCは分離が難しい場合や分離しないほうが効率がいい場合があるので，VとCの分離に関しては柔軟に対応してくれて構いません．<!-- 分担をM,V,Cの3つではなく，MとV+Cの2つに分けたのもこのためです．-->
+</p>
+
+<h2> Q. サンプルのキーイベントでは制御文字をunicodeで判別しているが，サンプルに載っている制御文字のunicodeをどこで調べれば良いか分からなかったが，サンプルを見る限りではC-aが\u0001と，アルファベット順のようなので，そう仮定してプログラムをすすめたが，Metaキー等はどうやって調べるか分からなかった．</h2>
+
+<p>
+A. 1バイト文字(ASCII文字やCtrl-Aなどの制御コード)の場合は，文字コードの0x00から0x7fがそれぞれunicodeでは\u0000から\u007fとなります．ですから，Ctrl-AからCtrl-Zは\u0001から\u001aに対応します．また，改行とタブは，それぞれ'\n'と'\t'で表現できます．
+</p>
+
+<p>
+ASCII文字や制御コードなどの文字コードを発生するイベントについては，サンプルプログラム中の<code>keyTyped</code>で処理できますが，文字コードを発生しない，例えばカーソルキーや<kbd>ALT</kbd>キーなどを押した場合は <a href="https://docs.oracle.com/javase/jp/8/docs/api/java/awt/event/KeyAdapter.html#keyPressed-java.awt.event.KeyEvent-"><tt>keyPressed</tt></a>というメソッドで処理します．<code>keyPressed</code>は何かキーを押した場合に必ず呼ばれるメソッドです．サンプルプログラムを改造する場合は，この<code>keyPressed</code>を<code>EditorController</code>クラスの中に追加してください．
+</p>
+
+<p>
+<kbd>ALT</kbd>，<kbd>SHIFT</kbd>，<kbd>CTRL</kbd>の各修飾キーの状態を調べるには，<code>keyPressed</code>の引数の<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/awt/event/KeyEvent.html"><tt>KeyEvent</tt></a>オブジェクトの<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/awt/event/InputEvent.html#isAltDown--"><tt>isAltDown()</tt></a>, <a href="https://docs.oracle.com/javase/jp/8/docs/api/java/awt/event/InputEvent.html#isShiftDown--"><tt>isShiftDown()</tt></a>, <a href="https://docs.oracle.com/javase/jp/8/docs/api/java/awt/event/InputEvent.html#isControlDown--"><tt>isControlDown()</tt></a>の各メソッドを使うことによって調べられます．ファンクションキーやカーソルキーは，<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/awt/event/KeyEvent.html#getKeyCode--"><tt>getKeyCode()</tt></a>と<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/awt/event/KeyEvent.html"><tt>KeyEvent</tt></a>クラスで定義されている<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/awt/event/KeyEvent.html#field.summary">キーコードに関する定数</a>を用いて調べることが出来ます．
+</p>
+
+<p>
+例えば，<code>keyPressed</code>で右矢印<kbd>→</kbd>と<kbd>ALT</kbd>が同時に押された場合の処理を行うには，
+次のようになります．
+</p>
+
+<pre class="ref">
+public void keyPressed(KeyEvent e) {
+  int i = e.getKeyCode();
+  if (i == KeyEvent.VK_RIGHT && evt.isAltDown()) {
+    // 右矢印とALTが同時に押された場合の処理
+  }
+}
+</pre>
+
+<h2>Q. 今回分からなかったことが一つあった．それは，改行コード．<tt>keyTyped</tt>内で<tt>getKeyChar</tt>をしているわけだが，これでは改行コードがbufferに入らない．今回は仕方なく，
+<pre class="ref">
+public void keyPressed(KeyEvent e) {
+  int i = e.getKeyCode();
+  if(i == e.VK_ENTER) {
+  model.insertCharAt(view.getCursorPosition(), '\n');
+    view.moveCursor(1);
+  }
+}
+</pre>
+とやることで，改行の認識を行ったのだが，この他にいい方法があったら是非知りたいと思う．</h2>
+
+<p>
+A. もちろん上記の方法で構いません．もっと簡単な方法は，改行コードが'\n' で表現できることを利用する方法です．
+</p>  
+
+<pre class="ref">
+public void keyTyped(KeyEvent e) {
+  char c = e.getKeyChar();
+  if (Character.isISOControl(c)) {
+    switch (c) {
+      case '\n':
+        //改行の入力に対する処理
+        break;
+      //以下，省略...
+    }
+  }
+}
+</pre>
+
+<p>
+同様に '\t'でTABキーも扱えます．
+</p>
+
+<p>
+ただし，カーソルキーなどを扱う場合は，<code>keyPressed</code>で処理しないといけないので，改行も<code>keyPressed</code>で処理した方がよいでしょう．
+</p>
+
+<h2>Q. ツールバーを付けると，文字入力ができなくなります．</h2>
+
+<p>
+A. まずは panelに<code>KeyListener</code>を<code>add</code>するようにしてください．(注：今年度のサンプルでは最初からそのようになっています．)
+この場合はこれだけでは解決しません．なぜなら，キーボードフォーカスがツールバーのボタンに行ってしまうからです．ツールバーのボタンはキーボードだけでボタンが押せるように，デフォルトではキーボードフォーカスを<kbd>TAB</kbd>キーで移動できるようになっています．パネルで文字を入力するには，キーボードフォーカスをパネルにもってくる必要があります．
+</p>
+
+<p>
+キーボードフォーカスをパネルに持ってくるには，通常は(1) <kbd>TAB</kbd>キーを押す方法，(2) マウスでパネルをクリックする方法があります．以下に，この2つを実現する方法を説明します．
+</p>
+
+<p>
+(1)については，<code>ViewPanel</code>クラスの<code>ViewPanel</code>のコンストラクタ内で，<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/awt/Component.html#setFocusable-boolean-"><tt>setFocusable(true);</tt></a>として下さい．
+</p>
+
+<p>
+キーボードフォーカスがボタンやパネルを移動するのがうっとうしい人は，panel以外の部品をすべて，<code>button.setFocusable(false);</code>などとしてしまう方法もあります．
+</p>
+
+<p>
+(2)のマウスクリックでfocusをpanelに移動するようにするには，<code>ViewPanel</code>のコンストラクタで<code>addMouseListener</code>して，マウスがクリックされた時に，
+<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/awt/Component.html#requestFocusInWindow--"><tt>requestFocusInWindow()</tt></a> が実行されるようにして下さい．
+
+<pre class="ref">
+ViewPanel() {
+  addMouseListener(new MouseAdapter() {
+    // 以下，「無名クラス」という書き方を使って書きます
+    public void mouseClicked(MouseEvent e) {
+      requestFocusInWindow();
+    }	
+  });
+}
+</pre>
+
+<p>
+(1),(2)は両方出来るようにした方が使い勝手がいいでしょう．
+</p>
+
+<hr/>
+<i>電気通信大学 情報理工学部 情報・通信工学科 5学期 MICS実験第一 資料</i>
+</body>
+</html>

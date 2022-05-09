@@ -1,0 +1,93 @@
+%\documentstyle[11pt,a4j]{jarticle} 
+\documentclass[11pt,a4j]{jarticle}
+\setlength{\oddsidemargin}{0mm}
+\setlength{\textwidth}{170mm} 
+\setlength{\topmargin}{-5mm}
+\setlength{\textheight}{240mm}
+\setlength{\columnsep}{8mm}
+
+\begin {document}
+\thispagestyle{empty}
+\begin{flushright}
+\begin{tabular}{|c|}\hline
+\hspace*{2cm} \\
+\hspace*{2cm} \\
+\hspace*{1.7cm} \\ \hline
+\end{tabular}\\
+{\huge\tt 2004-C2-1}
+\end{flushright}
+\begin{center}
+\begin{huge}
+~\\ ~\\ 
+{\bf 情報工学実験第二}\\
+{\bf C2課題(オブジェクト指向コース) レポート}\\
+\vspace{1cm}
+課題１~~ (担当：柳井)\\ 
+\vspace{6cm}
+
+\begin{tabular}{|l|p{8cm}|}\hline
+学籍番号&       \\ \hline
+ログイン名&       \\ \hline
+氏名    &       \\ \hline
+提出日  & \hspace*{1.7cm}月\hspace*{1.4cm}日 (　)\\ \hline
+提出期限 & 　1 月 11 日 (火) \\\hline
+\end{tabular}
+\end{huge}
+\end{center}
+\newpage
+
+\section{課題内容}
+課題内容の説明，分析
+
+\section{設計方針}
+プログラムの基本構想
+
+どのようなクラスを設計し，どのようにそれらを用いて，目的の処理を実現す
+るのか説明する．
+
+\section{プログラムの説明}
+クラス，その中のメソッド，メンバ変数の説明．
+
+main関数の説明．
+
+\section{実行例}
+実行画面のcut\&paste.
+
+\begin{verbatim}
+violet01% java Factorial 100   
+933262154439441526816992388562667004907159682643816214685929638952
+175999932299156089414639761565182862536979208272237582511852109168
+64000000000000000000000000
+\end{verbatim}
+
+\section{考察}
+実行結果に対する考察，コメント．（今回は，実行例の中に含めてもよい）
+
+\section{付録（プログラムリストや感想など）}
+
+\verb|cat -n prog.java| などとして，行番号付きのプログラムリスト
+を生成して，
+
+\noindent
+\verb|\begin{verbatim}....\end{verbatim}|を用いて記述すると読みやすい．
+ページ数が多くなる場合は，
+\verb|\small|や\verb|\footnotesize|を
+用いるとよい．
+
+\begin{small}
+\begin{verbatim}
+     1  public class UnitCounter {
+     2      private int value[];
+     3      private int radix;
+     4      private int figure;
+     5      public UnitCounter(int rdx, int fig) {
+     6          value = new int[fig];
+     7          for (int i = 0; i < fig; i++)
+     8              value[i] = 0;
+     9          radix = rdx;
+    10          figure = fig;
+    11      }
+\end{verbatim}
+\end{small}
+
+\end{document}

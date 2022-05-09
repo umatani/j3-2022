@@ -1,0 +1,259 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML//EN">
+<html> <head>
+<!-- (C)2011 K.Yanai (UEC) -->
+<meta name="robots" content="noindex,nofellow">
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=UTF-8">
+<title>J3課題 第1回目 FAQ</title>
+<link href="https://fonts.googleapis.com/css?family=Lato:400,700|Noto+Sans+JP:400,700" rel="stylesheet">
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="../oop-new.css" type="text/css">
+</head>
+
+<script type="text/javascript" src="js/shCore.js"></script>
+<script type="text/javascript" src="js/shBrushJava.js"></script>
+<script type="text/javascript" src="js/shBrushCpp.js"></script>
+<link href="css/shCore.css" rel="stylesheet" type="text/css" />
+<link href="css/shCoreDefault2.css" rel="stylesheet" type="text/css" />
+<link href="css/shThemeDefault2.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript">
+     SyntaxHighlighter.all()
+</script>
+
+<body>
+<h1>J3課題 第1回目 FAQ</h1>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+
+<h2>Q. 実行の仕方がわかりません．クラスファイルがいくつも生成されるようです．</h2>
+
+<p>
+Javaでは，<code>javac</code>でコンパイルして出力されるクラスファイル名はソースファイル名にかかわらず，<em>ソースファイル中のクラス名に"<code>.class</code>"をつけたものとなりますので注意してください．</em>クラスが2つあれば，クラスファイルも2つ出来ます．
+</p>
+
+<p>
+ですので，たとえば下記のプログラム：
+</p>
+
+<pre class="brush: java">
+class Student {
+  String id;    // 学籍番号
+  String name;  // 名前
+  int grade;    // 成績
+
+  public void print() {
+    System.out.println("ID   : " + id);  
+    System.out.println("Name : " + name);
+    System.out.println("Grade: " + grade);
+  }
+}
+
+class Main {
+  public static void main(String args[]) {
+    Student st = new Student();
+   
+    st.id = "1110";
+    st.name = "Suzuki";
+    st.grade = 200;
+
+    st.print();
+  }
+}
+</pre>
+
+<p>
+を<code>student.java</code>という名前のファイルに書いたとすると，コンパイルは：
+</p>
+
+<pre class="ref">
+javac student.java
+</pre>
+
+<p>
+のように実行しますが，生成されたクラスファイル(Javaバイトコードのファイル)の名前は，<code>student.class</code>ではなく，ソースコード中のクラス名と同じ綴りの最初が大文字のSで始まる<code>Student.class</code>と<code>Main.class</code>になります．
+</p>
+
+<p>
+次に，実行するときの注意点は，<em><code>main</code>メソッドの含まれるクラス名を指定する</em>ことです．この例の場合，<code>.java</code>ファイルの名前の<code>student</code>でも<code>Student</code>でもなく，正しくは<code>Main</code>です．"<code>.class</code>"をつけてはいけないことも覚えておきましょう．つまり，実行するときは以下のようにします．</p>
+
+<pre class="ref">
+java Main
+</pre>
+
+<h2 name="trycatch">Q. <code>try</code>，<code>catch</code>とはなんですか？</h2>
+
+<p>
+例外処理です．実行時にエラーが起こったときに備えて，その場合の処理を書いておくことができます．<code>try { .. }</code>の中で起った例外(エラー)は，<code>catch</code>節で捕らえてエラー処理をすることができます．
+</p>
+
+<p>
+主な例外には：
+<dl>
+  <dt><code>IOException</code></dt>
+  <dd>IO処理のエラーを示す</dd>
+  <dt><code>EOFException</code></dt>
+  <dd>ファイルの終りを示す </dd>
+  <dt><code>ArrayIndexOutOfBoundsException</code></dt>
+  <dd>配列の定義外の範囲へのアクセス</dd>
+</dl>
+などがあります．
+</p>
+
+<p>
+標準入力から1バイトを読み出す<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/io/InputStream.html#read--"><tt>System.in.read()</tt></a>メソッドは，
+</p>
+
+<pre class=ref>
+public abstract int read() throws IOException
+</pre>
+<p>と定義されており，<code>IOException</code>を投げることが関数の定義に書かれている．そのため，以下の様に必ず<code>try</code>/<code>catch</code>を使って例外処理を行う必要があります．
+</p>
+<pre class="ref">
+int val;
+try {
+  val = System.in.read();
+} catch(java.io.IOException e) {
+  return;
+}
+</pre>
+
+<p>
+また，例外はユーザが自分で定義することも可能です．例外を定義して，例外が起きた時に例外オブジェクトを<code>throw</code>してやると，正常の制御の流れとは別に，<code>catch</code>に書かれている処理を呼び出すことができます．たとえば，
+</p>
+
+<pre class="ref">
+class MyException extends Exception {
+  public MyException() { super(); }
+  public MyException(String s){ super(s); }
+}
+</pre>
+<p>
+のようにして例外のクラスを定義し，
+</p>
+<pre class="ref">
+public void push(int x) throws MyException {
+  top++;
+  if (top &gt;= STACKSIZE) throw new MyException(&quot;stack overflow&quot;);
+  elements[top] = x; 
+}
+int pop() throws MyException { 
+  if(top &lt; 0)  throw new MyException(&quot;stack underflow&quot;);
+  return elements[top--];
+}
+</pre>
+
+<p>
+のようにして例外を<code>throw</code>し，<code>main</code>メソッドの中に
+</p>
+
+<pre class="ref">
+try {
+  ...例外が起りうる文の列...
+} catch(MyException e){
+  System.out.println(e.getMessage());
+}
+</pre>
+
+<p>
+のように書くことで，例外が発生した場合に捕らえることができます．
+</p>
+
+<p>
+詳しくは，<a href="2.pdf">2004年までの旧情報工学科実験第ニで使われていたJavaのテキスト(その2)</a>を参照してください．
+</p>
+
+<!--
+<h2> Q. J3-1の練習問題9について質問です．</h2>
+<pre>
+ > INPUTクラスではInteger.parseInt()を使っていますが，
+ > 例外のNumberFormatExceptionはcatchしなくても良いのですか？
+ > catchしなくても実行時に
+ > Exception in thread "main" java.lang.NumberFormatException: For
+input string: "fdas"
+ >         at java.lang.NumberFormatException.forInputString(NumberFormatException.java:48)
+ >         at java.lang.Integer.parseInt(Integer.java:447)
+ >         at java.lang.Integer.parseInt(Integer.java:497)
+ >         at INPUT.Int(Practice9.java:145)
+ >         at Practice9.main(Practice9.java:6)
+ > のように表示して終了するだけだと思います．
+ > 例外処理はどの程度まで対応するのが妥当ですか？
+
+Readline が発生するIOException は catch しないと，
+コンパイルエラーになるので，エラー処理をつけているだけです．
+
+Javaでは，RuntimeException 系(実行時エラー)のException以外のException は
+catchすることが必須です．しないと，コンパイルエラーになります．
+
+NumberFormatExceptionはRuntimeException系のException
+ですので，catch する必要がありません．
+
+もちろん，必要がなくても，例外処理をしたければ，しても構いません．
+
+一般に，課題の問題文で要求されている内容以上のプログラムを
+作成して提出することは大変望ましい事ですので，やる気があれば，
+本人が納得するまで仕上げて，提出してくれて構いません．
+</pre>
+<HR>
+-->
+<h2>Q. メソッドに渡す引数は，C言語同様に値渡しと考えて宜しいでしょうか？</h2>
+
+<p>質問の詳細：</p>
+<pre class="ref">
+> 下のようなメソッド
+> void hoge(int a) {
+>   a = 1;
+> }
+> では，値が更新されないことが分かりました．
+> 一方，Bunsuuクラスに
+> void hoge(Bunsuu a) {
+>   a.bunshi = 1;
+>   this.bunshi = 2;
+> }
+> のようなメソッドを作り，
+> xx.hoge(yy);
+> としたら，値は共に更新されました．(xx, yyはBunsuuクラスのインスタンスです)
+> どのように考えれば宜しいでしょうか？
+</pre>
+
+<p>
+<code>int</code>，<code>double</code>などの基本データ型は値渡しで，配列やクラスのオブジェクトは参照渡しになります．
+</p>
+
+<p>
+C言語では，構造体は値渡しも参照渡しも可能で，配列については参照渡しのみが可能でした．一方，Javaではクラスオブジェクトも配列も(つまり<code>new</code>で生成したものはすべて)参照渡しのみしかできません．
+</p>
+
+<p>
+<code>String</code>クラスのオブジェクトも参照渡しですが，<code>String</code>クラスは特別で，一度生成されたオブジェクトの中身を書き換えることができません．例えば，<code>"a" + "b"</code>のような文字列操作を実行すると，<code>"ab"</code>という別のオブジェクトが生成され，元々のオブジェクトは変化しないでメモリ中に残っています(不要なら自動的にガベージコレクションで<code>free</code>されます)．そのため，見かけ上は，<code>String</code>クラスのオブジェクトは値渡しと同じになります．(一方，<code>StringBuffer</code>クラスは，オブジェクトの中身を変更可能です．)
+</p>
+
+<h2>Q. 練習問題の解答でスクリーンショットも一緒に提出したいのですが，どうすればいいでしょうか？</h2>
+
+<p>
+スクリーンショットなどの画像を提出したい場合はPDFに変換して提出して下さい．
+スクリーンショットとPDFファイルの生成方法は，<a href="screen.html">こちら</a>を参考にして下さい．
+</p>
+
+<h2>Q. パッケージを指定しているときに<code>java</code>コマンドでの実行はどうすればよいでしょうか？</h2>
+
+<p>
+実行時には<code>main</code>メソッドのあるクラス名を記述しますが，ここでパッケージも含めた完全なクラス名を書く必要があります．つまり，<code>pkg</code>という名前のパッケージにある<code>Leap</code>クラスなら，完全なクラス名は<code>pkg.Leap</code>となり，実行時には
+</p>
+
+<pre class="ref">
+java pkg.Leap
+</pre>
+
+<p>
+としてください．
+</p>
+
+<p>
+また，ディレクトリ構造がパッケージと一致している必要があることにも注意してください．
+</p>
+
+<hr/>
+<i>電気通信大学 情報理工学部 情報・通信工学科 5学期 MICS実験第一 資料</i>
+</body>
+</html>
+

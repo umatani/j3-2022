@@ -1,0 +1,1329 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML//EN">
+<html> <head>
+<!-- (C)2012 K.Yanai (UEC) -->
+<meta name="robots" content="noindex,nofellow">
+<meta http-equiv="Content-Type" content="text/html; CHARSET=UTF-8">
+<link href="https://fonts.googleapis.com/css?family=Lato:400,700|Noto+Sans+JP:400,700" rel="stylesheet">
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="../oop-new.css" type="text/css">
+<script type="text/javascript" src="../ans.js"></script>
+
+<script type="text/javascript" src="js/shCore.js"></script>
+<script type="text/javascript" src="js/shBrushJava.js"></script>
+<script type="text/javascript" src="js/shBrushCpp.js"></script>
+<link href="css/shCore.css" rel="stylesheet" type="text/css" />
+<link href="css/shCoreDefault2.css" rel="stylesheet" type="text/css" />
+<link href="css/shThemeDefault2.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript">
+     SyntaxHighlighter.all()
+</script>
+
+<title>J3課題 第4回目</title>
+</head>
+
+<body>
+<h1>J3課題 (第4回目)</h1>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+<p>
+前回まで，Javaによるオブジェクト指向プログラミングと，Swingを用いたGUIプログラミングについて勉強してきました．まだJavaのすべてを勉強したという訳ではありませんが，基本的な内容は一通り勉強しましたので，次のステップとして，Javaを実際に使いこなすことを目標としていきましょう．
+</p>
+
+<p>
+C言語でも語学(英語)でも同じですが，文法が分かったからと言ってそれだけでその言語を使いこなせるようにはなりません．基本をおさえたら，後は多少知らないことがあっても実際に言語を使ってみることが重要です．
+</p>
+
+<p>
+使ってみるということは，経験を積むということです．ただし，闇雲に経験を積もうとしても時間がかかるばかりです．効率的に経験を積むには，先人の経験を利用させてもらうのが近道です．
+</p>
+
+<p>
+そのために，今まで講義や演習で<em>アルゴリズム(algorithm)</em>や<em>データ構造(data structure)</em>を学習してきました．アルゴリズムは問題の解法，データ構造はデータの表現の仕方で，それぞれ一般的な知識でプログラミング言語には依存しません．このような知識は重要ですが，大規模なプログラムを構築するときにどのようにクラスを組み立ててプログラムを設計すればいいかというオブジェクト指向特有の経験は含まれていません．
+</p>
+
+<p>
+Javaプログラミングをマスターするには，問題の解法やデータの表現方法とは異なる，オブジェクト指向プログラムの「書き方」を勉強することが重要です．そのために，<em>パターン(pattern)</em>というものが用意されています．
+</p>
+
+<p>
+ パターンは，オブジェクト指向におけるクラスの組み合わせなどの典型的な書き方をまとめたもので，これを勉強することで，オブジェクト指向プログラミングの経験を効率的に学ぶことが可能となります．
+</p>
+
+<p>
+今回はオブジェクト指向のパターンとして，GUIプログラムのパターンである<b>Model-View-Controllerモデル</b>（略して，MVCモデル）と，MVCモデルで用いられる<b>Observerパターン</b>について説明します．
+</p>
+
+<p>
+前者のMVCモデルはプログラム構成法のパターンでアーキテクチャパターンと呼ばれるものの一種です．一方，後者のObserverパターンは，オブジェクト指向におけるクラスの組み合わせ方のパターンで，デザインパターンと呼ばれています．こちらはMVCモデルよりは規模の小さなパターンとなります．
+</p>
+
+<!-------------------------------------------------------------->
+
+<H2>パターンを用いたオブジェクト指向プログラミング</H2>
+
+<H3>MVCモデル</H3>
+
+<p>
+GUIプログラムの開発手法の一つに，Model-View-Controllerモデル（略して，MVCモデル）があります．
+</p>
+
+<p>
+この手法では，GUIシステムを大きく分けて，データを扱うmodel，表示を行うview，ユーザからの入力を処理するcontroller，の3つの部分に分けて構築します．それぞれの部分は，Javaの場合，中心となるクラスと補助的なクラスから構成されます．それぞれの部分をもう少し詳しく説明すると以下のとおりです．
+</p>
+
+<dl>
+  <dt>model (モデル)</dt>
+  <dd>データを扱う部分．Javaの場合，一般にはデータを保持するフィールドと，データを操作するメソッドを持ったクラスによって構成される．データが更新されたら，それをviewに通知する．</dd>
+  <dt>view (ビュー)</dt>
+  <dd>modelのデータに基づいて情報をユーザに提示する表示部分．Javaの場合，Swingによって表示を行う部分がviewに相当する．modelの内容が更新された際，再描画のために呼び出されることが一般的である．再描画のためのデータはmodelが保持している．</dd>
+  <dt>controller (コントローラ)</dt>
+  <dd>ユーザからのキーやマウスの入力を処理する部分．GUIの場合，viewと一体化していることが多いため，viewとcontrollerを一体化してしまう場合もある．Javaの場合，<code>ActionListener</code>，<code>MouseListener</code>，<code>KeyListener</code>などのインタフェースを実装したクラスに相当する．</dd>
+</dl>
+
+<p>
+MVCモデルに基づくプログラム開発を行う場合，できるだけM (model)，V (view)，C (controller)が互いに独立性が高くなるよう設計し，公開メソッドのみを通じてお互いが相互作用するようにシステムを実現します．
+</p>
+
+<img src="mvc0.png" width=600/>
+
+<p>
+M，V，Cの各部分の独立性の高さから，MVCモデルを採用することにより共同でのプログラミングが容易になります．例えば，3人グループの場合，modelを一人が担当，viewを一人が担当，さらにもう一人がcontrollerを担当，というようなことも可能です．
+</p>
+
+<p>
+また，modelを一人が担当して，view1 + controller1を一人が担当，さらにもう一人は別のview2 + controller2を作成して，以下の図の様に，同じ機能を持ったシステムでもユーザインタフェースの異なる2つのシステムを構築することも可能になります．</p>
+
+<img src="mvc2.png" width=700/>
+
+<p>
+modelとviewの独立性が高いため，複数のviewを1つのmodelに対して持たせることも容易で，例えばマルチウインドウのプログラムを簡単に作ることが出来ます．
+</p>
+
+<p>
+一般的な動作は，
+</p>
+
+<ol>
+<li>controllerにユーザからの入力が伝わり，それに伴い，contollerがmodelのメソッドを呼び出してmodelの内容を書き換える</li>
+<li>modelは，内容の書き換えによりviewの更新が必要であると判断した場合，viewを呼び出す</li>
+<li>viewが表示内容の更新(再描画)を行う</li>
+</ol>
+
+<p>
+というサイクルの繰り返しになります． ユーザの入力を起点として，contoller -&gt;
+model -&gt; view の順番で呼び出されます．
+</p>
+
+<p>
+さらに詳しいMVCモデルの説明は，<a href="mvc.pdf">この資料</a> を参照して下さい．
+</p>
+
+<p>
+このMVCのようなパターンは，システムの基本的な設計，つまりアーキテクチャのパターンであるため，<em>アーキテクチャパターン(architecture pattern)</em>と呼ばれています．
+興味のある人は，<a href="arch-pattern.pdf">この資料</a>を参照して下さい．
+</p>
+
+<p>
+MVCモデルでは，「modelが更新されると，viewを呼び出して更新する」ということがよく行われます．後述するデザインパターンには，「modelと連動しているviewを事前にmodelに登録しておき，更新時に一斉に呼び出す」ことを実現するためのObserverパターンというものがあります．このパターンは，システムの設計というほど大きな規模ではなく，オブジェクト指向プログラミングにおけるクラスの組み合わせ方を表現しています．このようなパターンを<em>デザインパターン(design pattern)</em>と呼びます．次にデザインパターンを見ていくことにします．
+</p>
+
+<h3>デザインパターン</h3>
+
+<p>
+オブジェクト指向プログラミング言語は，それ以前のプログラミング言語と比較すると利用可能な言語要素が多いため，それらを使いこなすのが大変です．
+</p>
+
+<p>
+例えば，Javaでプログラムを書こうとすると，
+</p>
+
+<ul>
+  <li>どんなクラスを作るのか
+  <li>継承するのか，あるいは，インスタンス変数として持つのか
+  <li>インターフェイスにするか，クラスにするか
+  <li>インスタンス変数にするのか，クラス変数にするのか
+  <li>インスタンスメソッドにするのか，クラスメソッドにするのか
+</ul>
+
+<p>
+など，プログラムを設計する上でさまざまな選択が必要です．
+</p>
+
+<p>
+もちろん，オブジェクト指向の言語要素は，必要性があって導入されているわけで，うまく使えば非常に強力な道具となります．しかしながら，初心者にはなかなか使いこなせないというのが実情でしょう．
+</p>
+
+<p>
+さて，それでは，どうやったらうまく使えるようになるのでしょうか？
+</p>
+
+<p>
+この問いに対して，以前は「プログラムをたくさん書いて経験を積む」というような回答しかできませんでした．
+</p>
+
+<p>
+そこで，この経験を組織的に整理してカタログとしてまとめようという動きが盛んになり，そうして作られたのがデザインパターンです．
+</p>
+
+<p>
+デザインパターンは，E. Gamma他による『Design Patterns』という書籍(本位田他訳『オブジェクト指向における再利用のためのデザインパターン』，ソフトバンク)によって広まりました．(この本ではC++を用いて説明しています．Javaを用いている書籍としては，『Java言語で学ぶデザインパターン入門』(結城浩著，ソフトバンク)などがあります．)この本では，デザインパターンについて次のように述べられています．
+</p>
+
+<blockquote>
+本書の目的は，オブジェクト指向ソフトウェアを設計する際の経験をデザインパターンとして記録することである．これらのデザインパターンは，オブジェクト指向システムにおいて重要でかつ繰り返し現れる設計を，それぞれ体系的に名前付けし，説明を加え，評価したものである．我々の目的は，人びとが効果的に利用できるような形式で設計経験を整理することである．そのために，もっとも重要なデザインパターンをいくつか文書化し，カタログの形で表示した．
+</blockquote>
+
+<p>
+つまり，経験を積んだプログラマが普段，特に意識せずに用いているオブジェクト指向プログラミングの方法をパターン毎に分類し，名前付けしたのがデザインパターンということです．ですから，人によってはこんなの当り前というようなパターンも多く含まれています．デザインパターンは，あくまでもオブジェクト指向のプログラム設計パターンですので，問題解決のための手法であるアルゴリズムとは異なります．
+</p>
+
+<p>
+『Design Patterns』には，計23個のデザインパターンがまとめられています．興味のある人は，<a href="design-pattern.pdf">この資料</a> を参照してください．
+</p>
+
+<p>
+『Design Patterns』は，Javaのクラスライブラリの設計にも大きな影響を与えています．実際，Javaのクラスライブラリには，書籍中のデザインパターンに基づいた設計が数多く含まれています．例えば，
+</p>
+
+<ul>
+  <li>AWTの<code>Component</code>，<code>Container</code>，Swingの<code>JComponent</code>，<code>JPanel</code>は，Compositeパターン</li>
+<!--  <li>AWT, Swingが各プラットフォームの部品を生成する方法はAbstract Factoryパターン-->
+  <li>入出力ストリームはDecoratorパターン</li>
+  <li><code>java.util.Iterator</code>は，Iteratorパターン</li>
+  <li><code>java.util.Observer</code>は，Observerパターン</li>
+</ul>
+
+<p>
+という感じです．
+</p>
+
+<p>
+それまでは「経験を積みなさい」という回答しかできなかったわけですが，経験がデザインパターンとして整理されたため，以降は「デザインパターンを学びなさい」という回答ができるようになったわけです．
+</p>
+
+<h3>Observerパターン</h3>
+
+<p>
+MVCモデルでも使われるObserverパターンを，例を用いて説明します．まず，次のプログラムを実行してみてください．
+</p>
+
+<pre class="brush: java;">
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+class Radix extends JFrame implements ActionListener {
+  private JTextField hex, dec;
+
+  public Radix() {
+    hex = new JTextField(3);
+    dec = new JTextField(3);
+    hex.addActionListener(this);
+    dec.addActionListener(this);
+    this.setLayout(new GridLayout(2, 2));
+    this.add(new JLabel("16"));
+    this.add(hex);
+    this.add(new JLabel("10"));
+    this.add(dec);
+    this.pack();
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.setVisible(true);
+  }
+
+  public void actionPerformed(ActionEvent e) {
+    if (e.getSource() == hex) {
+      String s = hex.getText(); // 16進数フィールドから読み取る
+      int v = Integer.parseInt(s, 16);
+      dec.setText(Integer.toString(v, 10)); // 10進数フィールドに書き込む
+    } else if (e.getSource() == dec) {
+      String s = dec.getText(); // 10進数フィールドから読み取る
+      int v = Integer.parseInt(s, 10);
+      hex.setText(Integer.toString(v, 16)); // 16進数フィールドに書き込む
+    }
+  }
+
+  public static void main(String[] args) {
+    new Radix();
+  }
+}
+</pre>
+
+<p>
+このプログラムは16進数と10進数を相互に変換するプログラムです．実行すると次のようなウィンドウが表示されるはずです．
+</p>
+
+<img src="radix.png" width=200/>
+
+<p>
+16進数のテキスト入力フィールドに数を入力して<kbd>Enter</kbd>を押すとその10進数表現が10進数のフィールドに表示され，10進数のフィールドに数を入力して<kbd>Enter</kbd>を押すとその16進数表現が16進数のフィールドに表示されます．
+</p>
+
+<p>
+このプログラムにおいて，テキスト入力フィールドで<kbd>Enter</kbd>が押された時に実行される<code>actionPerformed</code>メソッドは，<kbd>Enter</kbd>が押されたフィールドに応じて
+</p>
+
+<ul>
+  <li>16進のテキストフィールドから文字列を受け取り，10進のテキストフィールドに文字列をセットする</li>
+  <li>10進のテキストフィールドから文字列を受け取り，16進のテキストフィールドに文字列をセットする</li>
+</ul>
+
+<p>
+という処理をしています．
+</p>
+
+<p>
+実は，この構成には拡張性がないという問題があります．
+</p>
+
+<p>
+例えば，さらに8進と2進の変換も追加したいと思ったとしましょう．そうすると，
+</p>
+
+<ul>
+  <li>16進のテキストフィールドから文字列を受け取り，10進と8進と2進のテキストフィールドに文字列をセットする</li>
+  <li>10進のテキストフィールドから文字列を受け取り，16進と8進と2進のテキストフィールドに文字列をセットする</li>
+  <li>8進のテキストフィールドから文字列を受け取り，10進と16進と2進のテキストフィールドに文字列をセットする</li>
+  <li>2進のテキストフィールドから文字列を受け取り，10進と16進と8進のテキストフィールドに文字列をセットする</li>
+</ul>
+
+<p>
+という処理をしなくてはならなくなります．例えば8進数のテキストフィールドを増やすと，<code>ActionListener</code>の定義は次のようになります．
+</p>
+
+<pre class="brush: java;">
+public void actionPerformed(ActionEvent e) {
+  if (e.getSource() == hex) {
+    String s = hex.getText(); // 16進数フィールドから読み取る
+    int v = Integer.parseInt(s, 16);
+    dec.setText(Integer.toString(v, 10)); // 10進数フィールドに書き込む
+    oct.setText(Integer.toString(v, 8));  // 8進数フィールドに書き込む
+  } else if (e.getSource() == dec) {
+    String s = dec.getText(); // 10進数フィールドから読み取る
+    int v = Integer.parseInt(s, 10);
+    hex.setText(Integer.toString(v, 16)); // 16進数フィールドに書き込む
+    oct.setText(Integer.toString(v, 8));  // 8進数フィールドに書き込む
+  } else if (e.getSource() == oct) {
+    String s = dec.getText(); // 8進数フィールドから読み取る
+    int v = Integer.parseInt(s, 10);
+    hex.setText(Integer.toString(v, 16)); // 16進数フィールドに書き込む
+    dec.setText(Integer.toString(v, 10)); // 10進数フィールドに書き込む
+  }
+}
+</pre>
+
+<p>
+問題は2つあります．
+</p>
+
+<ul>
+  <li>各テキストフィールド毎の処理がどんどん複雑になっていく</li>
+  <li>新しいテキストフィールドを追加する時に，以前のテキストフィールドで<kbd>Enter</kbd>が押された時の処理をすべて変更しないといけない</li>
+</ul>
+
+<p>
+さて，どうしたらよいでしょうか？ここで登場するのが，Observerパターンです．
+</p>
+
+<p>
+Observerパターンは，あるオブジェクト(subject)の状態が変わった時，そのオブジェクトを観察しているオブジェクト(observer)全員に変更通知が届くようにするというパターンです．
+</p>
+
+<p>
+上の例をObserverパターンにあてはめると，次のように考えることができます．
+</p>
+
+<ul>
+  <li>ある一つの数値(subject)がある</li>
+  <li>その数値を16進で表示するobserverがいる</li>
+  <li>その数値を10進で表示するobserverがいる</li>
+  <li>その数値を8進で表示するobserverがいる</li>
+  <li>その数値を2進で表示するobserverがいる</li>
+</ul>
+
+<p>
+どれか一つのテキストフィールドでユーザが新しい値を入力したら，subjectをその値に変更します．そうすると，自動的に全員にその変更が通知され，全員がその新しい数値をそれぞれの基数で表示するというわけです．
+</p>
+
+<p>
+このようにすると，先述の問題は以下のとおり解決されます．
+</p>
+
+<ul>
+  <li>各テキストフィールドはsubjectだけを知っていればよく，表示する基数が新たに増えても複雑にならない</li>
+  <li>新しいテキストフィールドを追加しても，以前のテキストフィールドで<kbd>Enter</kbd>が押された時の処理を変更する必要がない</li>
+</ul>
+
+<p>
+なお，最初に説明したMVCモデルでは「modelが更新されると，viewを呼び出して更新する」ということがよく行われますが，これは「modelと連動しているviewを事前にmodelに登録しておいて，更新時に一斉に呼び出す」ということで実現できるので，まさにObserverパターンによって実現可能であると言えます．
+</p>
+
+<h3><tt>java.util</tt>パッケージの<tt>Observer</tt>と<tt>Observable</tt></h3>
+
+<p>
+Javaには，<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/util/Observable.html"><tt>java.util.Observable</tt></a>というクラスと<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/util/Observer.html"><tt>java.util.Observer</tt></a>というインタフェースが用意されています．
+</p>
+
+<p>
+<code>Observable</code>クラスがObserverパターンのsubjectに相当するクラスです．このクラスを継承して，そのプログラム用のsubject (concrete subject)を作ります．<code>Observable</code>は，次のようなメソッドを持っています．
+</p>
+
+<l>
+  <dt><tt>addObserver(Observer o)</tt></dt><dd>observerを登録する</dd>
+  <dt><tt>setChanged()</tt></dt><dd>状態が変化したというフラグを立てる</dd>
+  <dt><tt>notifyObservers()</tt></dt><dd>状態が変化したというフラグが立っていたら，全observerの<code>update</code>メソッドを呼び出す</dd>
+</dl>
+
+<p>
+Javaの<code>Observable</code>では，<code>Observer</code>への通知が，<code>setChanged</code>してから<code>notifyObservers</code>するという2段階になっています．
+</p>
+
+<p>
+<code>Observer</code>インタフェースがObserverパターンのobserverに相当するインタフェースです．Javaではインタフェースになっています．このインタフェースが持っているメソッドは<code>update</code>だけです．<code>Observable</code>の状態が変化すると，<code>update</code>メソッドが呼び出されます．
+</p>
+
+<p>
+<code>update</code>メソッドは，
+</p>
+
+<ul>
+  <li><tt>update(Observable o, Object arg)</tt></li>
+</ul>
+
+<p>
+というメソッドで，引数が2個あります．1つ目の引数は，この<code>update</code>を呼び出した<code>Observable</code>です．2つ目の引数ですが，実は，<code>notifyObservers</code>には，引数無しの<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/util/Observable.html#notifyObservers--"><tt>notifyObservers()</tt></a>と，引数付きの<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/util/Observable.html#notifyObservers-java.lang.Object-"><tt>notifyObservers(Object arg)</tt></a>があります．引数無しの<code>notifyObservers</code>を使うと，この2つ目の引数は<code>null</code>になります．引数付きの<code>notifyObservers</code>を使うと，その引数がこの2つ目の引数になります．
+</p>
+
+<img src="observer.png" width=700/>
+
+<p>
+これを使って基数変換のプログラムを書き直してみましょう．
+</p>
+
+<p>
+まず，observerが監視する対象であるsubjectを作ります．今回は対象は数値なので<code>java.util.Observable</code>クラスを継承した<code>int</code>フィールドを持つクラス<code>IntObservable</code>を作ります．内容に変化があった場合に，observerに一斉に通知します．プログラムは次のようになります．
+</p>
+
+<pre class="brush: java; first-line: 6;">
+class IntObservable extends Observable {
+  private int value;
+  public int getValue() {
+    return value;
+  }
+  public void setValue(int v) {
+    value = v;
+    setChanged();      // 状態変化のフラグをセット
+    notifyObservers(); // 登録されたすべてのObserverのupdateを呼び出す
+  }
+}
+</pre>
+
+<p>
+インスタンス変数<code>value</code>に，テキストフィールドに表示されている数値を持っています(テキストフィールド毎に異なる基数で表示するので見た目は違いますが，同じ数を表示していることに注意してください)．メソッドは2個で，その<code>value</code>をgetするメソッドとsetするメソッドです．
+</p>
+
+<p>
+<code>value</code>をsetすると，全observerに通知するために，<code>setChanged</code>と<code>notifyObservers</code>を呼び出しています．
+</p>
+
+<p>
+次に，通知を受けるobserverを作りましょう．
+</p>
+
+<pre class="brush: java; first-line: 18;">
+class TextFieldObserver extends JTextField
+    implements Observer, ActionListener {
+  private IntObservable intVal;
+  private int radix;
+  public TextFieldObserver(IntObservable s, int r) {
+    intVal = s;
+    radix = r;
+    intVal.addObserver(this); // Observerオブジェクトの登録．重要です！
+    this.addActionListener(this);
+  }
+  public void actionPerformed(ActionEvent e) {
+    String s = this.getText();
+    intVal.setValue(Integer.parseInt(s, radix));
+  }
+  public void update(Observable o, Object arg) {
+    String s = Integer.toString(intVal.getValue(), radix);
+    setText(s);
+  }
+}
+</pre>
+
+<p>
+<a href="http://docs.oracle.com/javase/jp/8/docs/api/javax/swing/JTextField.html"><tt>JTextField</tt></a>を継承して作りました．observerにするために，<code>Observer</code>をimplementsしています．さらに <code>JTextFiled</code>に入力があった時の処理のため，<code>ActionListener</code>もimplementsして，<code>actionPerformed</code>メソッドを定義しています．前の<code>Radix</code>クラスの例では<code>ActionListener</code>を1つにまとめてフレームである<code>Radix</code>クラスに持たせいましたが，今回はテキストフィールド自身を<code>ActionListener</code>にしています．
+</p>
+
+<p>
+コンストラクタで<code>IntObservable</code>を渡すようにして，インスタンス変数<code>intVal</code>に覚えておきます．また，基数も渡すようにして，インスタンス変数<code>radix</code>に覚えておきます．コンストラクタでは，その他，次のことをやっています．
+</p>
+
+<ul>
+  <li>自分自身を<code>Observer</code>として<code>intVal</code>に<code>addObserver</code>メソッドによって登録する</li>
+  <li>自分自身を<code>ActionListener</code>として，<code>addActionListener</code>でリスナーオブジェクトとして登録する</li>
+</ul>
+
+<p>
+<code>ActionListener</code>では，新しく入力された文字列を<code>getText</code>で取り出して，その文字列を<code>radix</code>に覚えておいた基数で数値として読みとって，<code>intVal</code>に<code>setValue</code>しています．そうすると，<code>IntObservable</code>クラスの<code>setValue</code>メソッドの中で全observerの<code>update</code>が呼び出されるはずです．
+</p>
+
+<p>
+<code>update</code>では，<code>intVal</code>から<code>getValue</code>で新しい数を取り出し，それを自分自身の基数で文字列に変換して<code>JTextField</code>に<code>setText</code>で表示します．この例題では<code>update</code>の引数はどちらも使用しません．
+</p>
+
+<p>
+メインは以下のようになります．
+</p>
+
+<pre class="brush: java; first-line: 39;">
+class ObserverRadix extends JFrame {
+  private TextFieldObserver hex, dec;
+  private IntObservable intVal;
+  
+  public ObserverRadix() {
+    intVal = new IntObservable();
+    hex = new TextFieldObserver(intVal, 16);
+    dec = new TextFieldObserver(intVal, 10);
+
+    this.setLayout(new GridLayout(2, 2));
+    this.add(new JLabel("16"));
+    this.add(hex);
+    this.add(new JLabel("10"));
+    this.add(dec);
+    this.pack();
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.setVisible(true);
+  }
+  public static void main(String[] args) {
+    new ObserverRadix();
+  }
+}
+</pre>
+
+<p>
+<code>ObserverRadix</code>のコンストラクタでは，<code>IntObservable</code>を1個作ります．また，16進数用と10進数用の<code>TextFieldObserver</code>を作って，<code>add</code>で追加します．<code>TextFieldObserver</code>を作るときには，<code>IntObservable</code>と基数を引数で渡します．
+</p>
+
+<p>
+以下のインポート文も忘れずにプログラムの先頭に書いてください．
+</p>
+
+<pre class="brush: java">
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
+</pre>
+
+<p>
+16進10進変換のプログラムも同じような構成で作ることができます．
+</p>
+
+<div class=rep>
+<h1>練習問題1 (提出不要)</h1>
+<p>
+では，上記の<code>Observer</code>を使った基数変換プログラムに2進数と8進数を追加してみましょう．
+</p>
+</div>
+
+<div class=rep>
+<h1>練習問題2 (提出してください)</h1>
+
+<p>
+次は<code>Observer</code>パターンを用いて，同時に世界の複数の都市の時間を表示する「世界時計」をGUIで作ってみましょう．例えば，以下のような画面イメージになります．
+</p>
+
+<img src="clock.png" width=400/>
+
+<p>
+<code>Observer</code>が監視する対象(subject)は現在の時刻とします．現在の時刻は，<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/util/Calendar.html"><tt>java.util.Calendar</tt></a>クラスを用いることで取得可能です．以下のようにして使います．<code>setValue</code>の中で以下の方法で現在時刻を取得します．
+</p>
+
+<pre class="ref">
+Calendar cal = Calendar.getInstance(); 
+hour = cal.get(Calendar.HOUR_OF_DAY); 
+min = cal.get(Calendar.MINUTE); 
+sec = cal.get(Calendar.SECOND); 
+</pre>
+
+<p>
+<code>getValue</code>では時差補正後の時刻を文字列にして返します．<code>getValue</code>は<code>getValue(int diff)</code>として，時差を引数で渡せるようにしましょう．
+</p>
+
+<p>
+現在の時刻を整形して文字列にするには，次のように<code>String</code>クラスの<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/lang/String.html#format-java.lang.String-java.lang.Object...-"><tt>format</tt></a>メソッドを利用することで，C言語の <code>sprintf</code>と同様に書式に基づいて出力することが可能です．
+</p>
+
+<pre class="ref">
+currentTime = String.format("%02d:%02d:%02d", hour, min, sec);
+</pre>
+
+<p>
+実際には，日本以外の場所の時間については時差があるので，<code>(hour + <時差> + 24) % 24</code>として，現地時間の<code>hour</code>を計算します．24を加えるのは時間が0未満になるのを防ぐためで，<code>% 24</code>によって24で割った余りを計算するのは，24を足したことによって，時間が24以上になってしまうことを防ぐためです．24で割った余りは0〜23の整数値になることが保証されます．
+</p>
+
+<p>
+時計なので，時間表示を毎秒更新する必要があります．<a href="http://docs.oracle.com/javase/jp/8/docs/api/javax/swing/Timer.html"><tt>javax.swing.Timer</tt></a>クラスを利用して，1秒(1000ミリ秒)おきに画面を更新しましょう．<code>Timer</code>クラスはコンストラクタにタイマイベントを発生させる間隔(ミリ秒)と<code>ActionListener</code>を渡します．
+</p>
+
+<pre class="ref">
+// 1秒毎にactionPerformedを呼び出す
+timer = new Timer(1000, this);
+</pre>
+
+<p>
+<code>Timer</code>で呼び出す<code>actionPerformed</code>は，現在時間を取得した後，
+</p>
+
+<pre class="ref">
+setChanged();
+notifyObservers();
+</pre>
+
+<p>
+の2つのメソッドを呼び出すことになります．ですので，<code>Timer</code>が呼び出す<code>actionPerformed</code>メソッドは，observerではなくて<code>Observable</code>に用意しましょう．
+</p>
+
+<p>
+<code>Observable</code>は以下のようになります．
+</p>
+
+<pre class="brush: java;">
+class TimeObservable extends Observable
+    implements ActionListener {
+  private Timer timer;
+  // 現在時刻を保持するインスタンス変数
+  private int hour, min, sec;
+
+  public TimeObservable() {
+    // 1秒毎にactionPerformedを呼び出す
+    timer = new Timer(1000, this);
+    timer.start();
+  }
+
+  public void actionPerformed(ActionEvent arg0) {
+    this.setValue();
+  }
+
+  void setValue() { ... }
+  String getValue(int diff) { ... }
+}
+</pre>
+
+<p>
+observerの方は，入力は不要なので<code>JPanel</code>を継承して，<code>GridLayout(1,2)</code>として，<code>JLabel</code>を2つ貼り付けましょう．左側が都市名，右側が現在時刻です．都市名と日本との時差をコンストラクタに渡すようにして，インスタンス変数<code>diff</code>で記録しておきましょう．<code>update</code>では，<code>setText</code>によって，時差を考慮した現在時刻を右側の<code>JLabel</code>にセットします．
+</p>
+
+<input class="btn btn-success" type="button" value="ヒントを表示" style="font-size:large;"
+onclick="
+  if (document.getElementById('hide3').style.display == 'block') {
+    document.getElementById('hide3').style.display='none';
+  } else {
+    document.getElementById('hide3').style.display='block';
+  }
+"/>
+
+<div id="hide3" style="display: none;">
+<p>
+クラス名を<code>ClockPanel</code>とすると，例えば，以下のような感じになります．
+</p>
+
+<pre class="brush: java; first-line: 20;">
+class ClockPanel extends JPanel implements Observer {
+  private TimeObservable timeObservable;
+  private int diff;
+  private JLabel timeLabel;
+  public ClockPanel(TimeObservable to, String place,
+                    int diff) {
+    timeObservable = to;
+    this.diff = diff;
+    timeObservable.addObserver(this);
+    timeLabel = new JLabel(to.getValue(diff),
+                           JLabel.CENTER);
+    this.setLayout(new GridLayout(1, 2));
+    this.add(new JLabel(place));
+    this.add(timeLabel);
+  }
+  public void update(Observable o, Object arg) {
+    timeLabel.setText(timeObservable.getValue(diff));
+  }
+}
+</pre>
+
+<p>
+あとは<code>JFrame</code>(を継承したフレーム)に適切なレイアウトを設定し，このパネルを貼り付けると表示ができます．<code>ClockPanel</code>のオブジェクトを生成する際には，以下のようにします．
+</p>
+
+<pre class="ref">
+TimeObservable t = new TimeObservable();
+this.add(new ClockPanel(t, "London", -9));
+this.add(new ClockPanel(t, "New York", -14));
+</pre>
+
+<p>
+あとは，自力で考えてみましょう．難しかったら教員に積極的に質問してみてください．
+</p>
+</div>
+</div>
+<!--
+<p>
+<a href="3.html#kadai1">課題3-5</a>で
+16進10進変換を行なうプログラムを作りました．
+このプログラムにObserverパターンを適用して，
+2進8進10進16進の変換を相互に行うプログラムを作成してください．
+</p>
+<p>【ヒント】(追加する予定です．3-5の解答も3-5のところに追加予定です．)
+</p>
+-->
+
+<!---------------------------------------------------------------------------->
+
+<h2 id="DrawEditor">MVCモデルによるドローエディタ</h2>
+
+<p>
+Model-View-Contoroller (MVC)モデルの少し大きめのGUIプログラムの例として，赤い四角を描くドローエディタプログラムを示します．今回はただ単に点を打つのではなく，マウスをドラッグする(ボタンを押したまま動かす)と赤い四角形が描けるプログラムを作ります．
+</p>
+
+<p>
+このプログラムは，前回の
+</p>
+
+<ul>
+<li><code>CircleFrame</code>で行ったマウスクリックによる図形描画</li>
+<li><code>RandomFrame</code>で使った<code>Figure</code>クラスを継承した個別の図形クラスによるデータ表現</li>
+</ul>
+
+<p>
+を合わせて，それをMVCモデルで再構築したものとなっています．忘れてしまった人は，前回と前々回の講義資料をもう一度参照して下さい．
+</p>
+
+<p>
+前回，前々回は特にMVCモデルを意識していませんでしたが，このようにプログラムをMVCモデルで構築し，model, view, controllerの独立性を高めることによって，複数人での開発が容易になります．また，例えば，viewだけを入れ替えることで見た目の異なるGUIプログラムにすることも可能です．さらに，複数のviewオブジェクトを用いたマルチウィンドウにも容易に対応可能です．
+</p>
+
+<h3>図形を表すクラス</h3>
+
+<p>
+まず図形を表すクラスを定義しましょう．将来，いろいろな図形が扱えるよう
+に，全ての図形の親となるクラスFigureを作り，そのサブクラスとして四角形を表す
+RectangleFigureを定義します．
+</p>
+
+<p>
+どんな図形も位置と大きさと色を持っていることにすると，<code>Figure</code>クラスは次のようになります．<code>draw</code>メソッドは空にしておいて，サブクラスでオーバライドすることにします．
+</p>
+
+<pre class="ref">
+class Figure {
+  protected int x, y, width, height;
+  protected Color color;
+  // 中略
+  public void draw(Graphics g) {}
+}
+</pre>
+
+<p>
+とりあえず，位置と大きさと色をすべて引数で指定するコンストラクタを作っておきましょう．
+</p>
+
+<pre class="brush: java; first-line: 7;">
+public Figure(int x, int y, int w, int h, Color c) {
+  this.x = x; this.y = y;  // this.x, this.y はインスタンス変数を指す．
+  width = w; height = h;   // ローカル変数で同名の変数がある場合は，this
+  color = c;               // を付けると，インスタンス変数を指す．
+}
+</pre>
+
+<p>
+位置と大きさを変更するメソッドも用意します(本当は，位置と大きさを取り出すメソッドや，色を変更，取り出すメソッドも用意すべきですが，とりあえず省略します)．
+</p>
+
+<pre class="brush: java; first-line: 15;">
+public void setSize(int w, int h) {
+  width = w; height = h;
+}
+public void setLocation(int x, int y) {
+  this.x = x; this.y = y;
+}
+</pre>
+
+<p>
+マウスでドラッグした時に，ドラッグを開始した点と終了した点の座標から，描く図形の位置と大きさは決まります．そこで，2点の座標を与えることによって，位置と大きさを設定するメソッド<code>reshape</code>も作ります．
+</p>
+<!--ただし，どのように位置と大きさを決定するかは，図形の種類によって違う可
+能性があります．そこで，実装はサブクラスで定義することにして，抽象メソッ
+ドとして宣言しておきます．-->
+
+<pre class="brush: java; first-line: 21;">
+public void reshape(int x1, int y1, int x2, int y2) {
+  int newx = Math.min(x1, x2);
+  int newy = Math.min(y1, y2);
+  int neww = Math.abs(x1 - x2);
+  int newh = Math.abs(y1 - y2);
+  setLocation(newx, newy);
+  setSize(neww, newh);
+}
+</pre>
+
+<p>
+四角形の場合，ドラッグの開始点と終了点が与えられると，左上の点は，両方の点のx座標の最小値，y座標の最小値になります．<code>Math.min</code>は最小値を求めるメソッドです．また，幅と高さは，両方の点の各座標の差の絶対値になります．<code>Math.abs</code>は絶対値を求めるメソッドです．
+</p>
+<!--
+図形を実際にどのように描くかは，それぞれのサブクラスが決定します．従っ
+て，Figureクラスでは抽象メソッドとしてpaintを定義しておきます．サブク
+ラスは必ずpaintを定義しないといけません．
+
+<pre class="brush: java; first-line: 20;">
+<pre class=ref>
+  abstract public void paint(Graphics g);
+</pre>
+-->
+
+<p>
+抽象クラス<code>Figure</code>の定義は以上です．
+</p>
+
+<p>
+次に<code>Figure</code>のサブクラスとして，具体的な図形である四角形を表す<code>RectangleFigure</code>を定義しましょう．コンストラクタと<code>draw</code>メソッドを定義します．
+</p>
+
+<pre class="brush: java; first-line: 32;">
+class RectangleFigure extends Figure {
+  public RectangleFigure(int x, int y, int w, int h, Color c) {
+    super(x, y, w, h, c);
+    // 引数付きのコンストラクタは継承されないので，コンストラクタを定義．
+    // superで親のコンストラクタを呼び出すだけ．
+  }
+  public void draw(Graphics g) {
+    g.setColor(color);
+    g.drawRect(x, y, width, height);
+  }
+}
+</pre>
+
+<h3>Model</h3>
+<p>
+次に，描画したデータを記録しておく，アプリケーションの中心になるクラス<code>DrawModel</code>を作りましょう．<code>DrawModel</code>がMVCにおけるmodelのクラスということになりますが，先ほど定義した<code>Figure</code>クラスとそのサブクラスも大きく分けるとmodelの一部ということになるでしょう．
+</p>
+
+<ul>
+  <li><code>DrawModel</code>は，Obserserパターンにおける<code>Observable</code>ですので，<code>Observable</code>クラスを継承します．</li>
+  <li><code>DrawModel</code>は描かれた図形をすべて記録します．<code>ArrayList</code>を使って記録することにしましょう．</li>
+  <li>現在操作対象になっている図形を記録します．</li>
+  <li>現在設定されている色を記録します．</li>
+</ul>
+
+<p>
+結局，<code>DrawModel</code>クラスは次のようになります．
+</p>
+<pre class="brush: java; first-line: 47;">
+class DrawModel extends Observable {
+  protected ArrayList&lt;Figure> fig;
+  protected Figure drawingFigure;
+  protected Color currentColor;
+
+  public DrawModel() {
+    fig = new ArrayList&lt;Figure>();
+    drawingFigure = null;
+    currentColor = Color.red;  // 色はとりあえず赤で固定
+  }
+  // 中略
+}
+</pre>
+
+<p>
+<code>DrawModel</code>のメソッドとしては，まず，図形を記録している<code>ArrayList</code>を返すメソッドと，何番目かを指定して図形を取り出すメソッドを用意します．
+</p>
+
+<pre class="brush: java; first-line: 56;">
+public ArrayList&lt;Figure> getFigures() {
+  return fig;
+}
+public Figure getFigure(int idx) {
+  return fig.get(idx);
+}
+</pre>
+
+<p>
+後は，新たに図形を作って追加するメソッドと，操作中の図形の形を変更するメソッドを用意します．
+それぞれ図形の情報を変更したら，<code>setChanged</code>ソッド，<code>notifyObservers</code>メソッドを順に実行して，modelの変化をobserverであるviewに通知します．
+</p>
+
+<pre class="brush: java; first-line: 62;">
+public void createFigure(int x,int y) {
+  Figure f = new RectangleFigure(x, y, 0, 0, currentColor);
+  fig.add(f);
+  drawingFigure = f;
+  setChanged();
+  notifyObservers();
+}
+
+public void reshapeFigure(int x1, int y1, int x2, int y2) {
+  if (drawingFigure != null) {
+    drawingFigure.reshape(x1, y1, x2, y2);
+    setChanged();
+    notifyObservers();
+  }
+}
+</pre>
+
+<h3>View</h3>
+
+<p>
+次に，MVCのviewを作ります．<code>DrawModel</code>が記録している図形を画面に表示する部品<code>ViewPanel</code>クラスをviewに対応するクラスとします．これは<code>paintComponent</code>メソッドをオーバライドする独自GUI部品ですので，<code>JPanel</code>クラスを継承して作ることにします．<code>ViewPanel</code>クラスは，それと同時にObserverパターンにおけるobserverになります．そのため，<code>Observer</code>インタフェースも同時にimplementsします．
+</p>
+
+<p>
+コンストラクタで<code>DrawModel</code>と(後ほど説明する)<code>DrawController</code>を受け取り，<code>addMouseListener</code>メソッド，<code>addMouseMotionListener</code>メソッドを呼び出してリスナーオブジェクトを関連付けておきます．一方，<code>paintComponent</code>メソッドでは，<code>getFigures</code>メソッドを使って，<code>DrawModel</code>が記録しているすべての<code>Figure</code>を描画します．<code>update</code>メソッドでは，単に<code>repaint</code>メソッドを呼び出して，再描画するだけです．
+</p>
+
+<pre class="brush: java; first-line: 78;">
+///////////////////////////////////////////////
+// View (V)
+
+// Viewは，Observerをimplementsする．Modelを監視して，
+// モデルが更新されたらupdateする．実際には，Modelから
+// updateが呼び出される．
+class ViewPanel extends JPanel implements Observer {
+  protected DrawModel model;
+  public ViewPanel(DrawModel m, DrawController c) {
+    this.setBackground(Color.white);
+    this.addMouseListener(c);
+    this.addMouseMotionListener(c);
+    model = m;
+    model.addObserver(this);
+  }
+  public void paintComponent(Graphics g) {
+    super.paintComponent(g);
+    ArrayList&lt;Figure> fig = model.getFigures();
+    for(int i = 0; i < fig.size(); i++) {
+      Figure f = fig.get(i);
+      f.draw(g);
+    }
+  }
+  public void update(Observable o, Object arg) {
+    repaint();
+  }
+}
+</pre>
+
+<h3>Controller</h3>
+<p>
+MVCのcontrollerは，前回も利用した<code>MouseListener</code>，<code>MouseMotionListener</code>をimplementsしたリスナークラスになります．
+</p>
+
+<ul>
+  <li>マウスが押されたら，その座標をドラッグの開始点として記録する．同時に，<code>createFigure</code>で新しく四角形を作る．</li>
+  <li>マウスがドラッグされたら，その四角形の形を変化させる．</li>
+</ul>
+
+<p>
+マウスが押されたかどうかは<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/event/MouseListener.html"><tt>MouseListener</tt></a>インタフェース，ドラッグは<a href="http://docs.oracle.com/javase/jp/8/docs/api/java/awt/event/MouseMotionListener.html"><tt>MouseMotionListener</tt></a>インタフェースなので，両方を実装したクラスを作ります．
+</p>
+
+<pre class="brush: java; first-line: 127;">
+////////////////////////////////////////////////
+// Controller (C)
+
+class DrawController implements MouseListener, MouseMotionListener {
+  protected DrawModel model;
+  protected int dragStartX,dragStartY;
+  public DrawController(DrawModel a) {
+    model = a;
+  }
+  public void mouseClicked(MouseEvent e) {}
+  public void mousePressed(MouseEvent e) {
+    dragStartX = e.getX(); dragStartY = e.getY();
+    model.createFigure(dragStartX, dragStartY);
+  }
+  public void mouseDragged(MouseEvent e) {
+    model.reshapeFigure(dragStartX, dragStartY, e.getX(), e.getY());
+  }
+  public void mouseReleased(MouseEvent e) {}
+  public void mouseEntered(MouseEvent e) {}
+  public void mouseExited(MouseEvent e) {}
+  public void mouseMoved(MouseEvent e) {}
+}
+</pre>
+
+<h3>メイン</h3>
+
+<p>
+さて，最後にメインクラスを作りましょう．必要な配線をするという感じです．いつものように<code>JFrame</code>クラスを継承した<code>DrawFrame</code>クラスのコンストラクタの中で，必要なオブジェクトを生成て，部品を<code>this</code>に張り付けます．
+</p>
+
+<p>
+まず，<code>DrawModel</code>，<code>DrawController</code>，<code>ViewPanel</code>オブジェクトを順に生成します．最後に，<code>main</code>メソッドで<code>DrawFrame</code>オブジェクトを一つ生成すれば完成です．
+</p>
+
+<pre class="brush: java; first-line: 104;">
+//////////////////////////////////////////////////
+// Main class
+//   (GUIを組み立てているので，view の一部と考えてもよい)
+class DrawFrame extends JFrame {
+  DrawModel model;
+  ViewPanel view;
+  DrawController cont;
+  public DrawFrame() {
+    model = new DrawModel();
+    cont = new DrawController(model);
+    view = new ViewPanel(model, cont);
+    this.setBackground(Color.black);
+    this.setTitle("Draw Editor");
+    this.setSize(500, 500);
+    this.add(view);
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.setVisible(true);
+  }
+  public static void main(String[] args) {
+    new DrawFrame();
+  }
+}
+</pre>
+
+<input class="btn btn-primary" type="button" value="DrawFrameプログラムの全ソースコードを表示" style="font-size:large;"
+onclick="
+  if (document.getElementById('hide1').style.display == 'block') {
+    document.getElementById('hide1').style.display='none';
+  } else {
+    document.getElementById('hide1').style.display='block';
+  }
+"/>
+
+<div id="hide1" style="display: none;">
+<pre class="brush: java">
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
+
+// 描画した図形を記録する Figure クラス (継承して利用する)
+class Figure {
+  protected int x, y, width, height;
+  protected Color color;
+  public Figure(int x, int y, int w, int h, Color c) {
+    this.x = x; this.y = y;  // this.x, this.y はインスタンス変数．
+    width = w; height = h;   // ローカル変数で同名の変数がある場合は，this
+    color = c;               // を付けると，インスタンス変数を指す．
+  }
+  public void setSize(int w, int h) {
+    width = w; height = h;
+  }
+  public void setLocation(int x, int y) {
+    this.x = x; this.y = y;
+  }
+  public void reshape(int x1, int y1, int x2, int y2) {
+    int newx = Math.min(x1, x2);
+    int newy = Math.min(y1, y2);
+    int neww = Math.abs(x1 - x2);
+    int newh = Math.abs(y1 - y2);
+    setLocation(newx, newy);
+    setSize(neww, newh);
+  }
+  public void draw(Graphics g) {}
+}
+
+class RectangleFigure extends Figure {
+  public RectangleFigure(int x, int y, int w, int h, Color c) {
+    super(x, y, w, h, c);
+    // 引数付きのコンストラクタは継承されないので，コンストラクタを定義．
+    // superで親のコンストラクタを呼び出すだけ．
+  }
+  public void draw(Graphics g) {
+    g.setColor(color);
+    g.drawRect(x, y, width, height);
+  }
+}
+////////////////////////////////////////////////
+// Model (M)
+
+// modelは java.util.Observableを継承する．Viewに監視される．
+class DrawModel extends Observable {
+  protected ArrayList&lt;Figure> fig;
+  protected Figure drawingFigure;
+  protected Color currentColor;
+  public DrawModel() {
+    fig = new ArrayList&lt;Figure>();
+    drawingFigure = null;
+    currentColor = Color.red;
+  }
+  public ArrayList&lt;Figure> getFigures() {
+    return fig;
+  }
+  public Figure getFigure(int idx) {
+    return fig.get(idx);
+  }
+  public void createFigure(int x, int y) {
+    Figure f = new RectangleFigure(x, y, 0, 0, currentColor);
+    fig.add(f);
+    drawingFigure = f;
+    setChanged();
+    notifyObservers();
+  }
+  public void reshapeFigure(int x1, int y1, int x2, int y2) {
+    if (drawingFigure != null) {
+      drawingFigure.reshape(x1, y1, x2, y2);
+      setChanged();
+      notifyObservers();
+    }
+  }
+}
+
+////////////////////////////////////////////////
+// View (V)
+
+// Viewは，Observerをimplementsする．Modelを監視して，
+// モデルが更新されたupdateする．実際には，Modelから
+// update が呼び出される．
+class ViewPanel extends JPanel implements Observer {
+  protected DrawModel model;
+  public ViewPanel(DrawModel m, DrawController c) {
+    this.setBackground(Color.white);
+    this.addMouseListener(c);
+    this.addMouseMotionListener(c);
+    model = m;
+    model.addObserver(this);
+  }
+  public void paintComponent(Graphics g) {
+    super.paintComponent(g);
+    ArrayList&lt;Figure> fig = model.getFigures();
+    for(int i = 0; i < fig.size(); i++) {
+      Figure f = fig.get(i);
+      f.draw(g);
+    }
+  }
+  public void update(Observable o, Object arg) {
+    repaint();
+  }
+}
+
+//////////////////////////////////////////////////
+// Main class
+//   (GUIを組み立てているので，view の一部と考えてもよい)
+class DrawFrame extends JFrame {
+  DrawModel model;
+  ViewPanel view;
+  DrawController cont;
+  public DrawFrame() {
+    model = new DrawModel();
+    cont = new DrawController(model);
+    view = new ViewPanel(model,cont);
+    this.setBackground(Color.black);
+    this.setTitle("Draw Editor");
+    this.setSize(500, 500);
+    this.add(view);
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.setVisible(true);
+  }
+  public static void main(String[] args) {
+    new DrawFrame();
+  }
+}
+
+////////////////////////////////////////////////
+// Controller (C)
+
+class DrawController implements MouseListener, MouseMotionListener {
+  protected DrawModel model;
+  protected int dragStartX, dragStartY;
+  public DrawController(DrawModel a) {
+    model = a;
+  }
+  public void mouseClicked(MouseEvent e) {}
+  public void mousePressed(MouseEvent e) {
+    dragStartX = e.getX(); dragStartY = e.getY();
+    model.createFigure(dragStartX, dragStartY);
+  }
+  public void mouseDragged(MouseEvent e) {
+    model.reshapeFigure(dragStartX, dragStartY, e.getX(), e.getY());
+  }
+  public void mouseReleased(MouseEvent e) {}
+  public void mouseEntered(MouseEvent e) {}
+  public void mouseExited(MouseEvent e) {}
+  public void mouseMoved(MouseEvent e) {}
+}
+</pre>
+</div>
+
+<div class="rep">
+<h1>練習問題3 (提出不要)
+</h1>
+
+<p>
+MVCモデルの特徴にmodelとviewの独立性が高いことが挙げられます．その特性を生かして，<code>DrawFrame</code>の中に<code>ViewPanel</code>を4つ生成してみましょう．
+</p>
+
+<p>
+<code>GridLayout(2,2)</code>で，<code>setSize(1000,1000)</code>としてみましょう．そのまま4つ<code>add</code>するとviewの境界が分かりにくいので，<code>DrawFrame</code>のコンストラクタ中で<code>setBorder</code>メソッドを使って，
+</p>
+
+<pre class=ref>
+import javax.swing.border.*;
+
+view.setBorder(new LineBorder(Color.blue, 3));
+</pre>
+
+<p>
+などとして，<code>ViewPanel</code>に枠を付けます．<code>import javax.swing.border.*;</code>が必要ですので，忘れずに追加してください．
+</p>
+
+<p>
+ちなみに2個の場合は，以下のようになります．
+</p>
+
+<img src="DrawFrame.png" width=600/>
+
+<div class="alert alert-success" role="alert">
+  <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+  <b>ヒント:</b> <tt>ViewPanel</tt>のオブジェクトだけ複数個生成します．<tt>view</tt>がいくつあっても，<tt>DrawModel</tt>，<tt>DrawController</tt>のオブジェクトはそれぞれ1つだけしか生成しません．
+</div>
+</div>
+
+<h3>クラス図</h3>
+
+<p>
+クラスの数が増えてきて，継承，実装，フィールドにインスタンス変数として他のクラスのオブジェクトを保持など，クラス間の関係が複雑になって来ました．クラスの関係を分かりやすくまとめるために，<em>クラス図(class diagram)</em>を使ってみましょう．
+</p>
+
+<p>
+クラス図は，オブジェクト指向に基づくシステム設計において，設計図の表現形式である<em>UML (Unified Modeling Language)</em>で使われる図の一つです．</p>
+
+<p>
+クラス図は，クラスとインタフェース，および，それらの相互関係を図に表現したものです．クラス図では，クラス(インタフェース)はクラス(インタフェース)名を四角形で囲って表現され，相互関係はそれらの間を結ぶ矢印線によって表現されます．矢印線の形状で，関係の種類を区別します．
+</p>
+
+<p>
+ここでは，次の3種類の関係について，クラス図を使って表すこととします．
+実際にはもっと多くの関係がありますが，ここではこの3種類で十分でしょう．
+</p>
+
+<dl>
+<dt>has-a: フィールドとしてオブジェクトを保持．「オブジェクトコンポジション」という</dt><dd>
+<img src="diagram/has0.gif" width=500/>
+<p>
+フィールドとしてオブジェクトを保持している関係，メソッドを呼び出し可能である関係を表現します．参照元のオブジェクトから，参照先のオブジェクトへ矢印を描きます．矢の先は &gt; で表されます．
+</p>
+</dd>
+<dt>extends: 継承</dt>
+<dd>
+<img src="diagram/extends0.gif" width=600/>
+<p>
+子クラスから親クラスに実線の矢印を引きます．矢の先は△になります．
+</p>
+</dd> 
+<dt>implements(実装)</dt>
+<dd> 
+<img src="diagram/implements0.gif" width=800/>
+<p>
+実装クラスからインタフェースに点線の矢印を引きます．矢の先は△になります．
+</p>
+</dd> 
+</dl>
+
+<div class="panel panel-info">
+<div class="panel-heading"><b>補足</b></div>
+<div class="panel-body">
+UMLについての詳細は，3年生後期の「ソフトウェア工学」で学習するでしょう．詳細が知りたい人は，旧情報工学科講義<a href="http://mm.cs.uec.ac.jp/soft/note.html">「ソフトウェア工学」</a>(柳井担当)の講義資料の第4回目以降を見てください．閲覧に必要なパスワードは ID: software, PW: jed です．
+</div>
+</div>
+
+<p>
+<code>DrawFrame</code>クラスは，フレームに部品を貼り付けるだけのクラスですので，ここでは省略して，それ以外のクラスの関係を図にしてみると，以下のようになります．
+この様に図にして見ることで，クラス間の関係が明確になります．
+<!--例えば，Modelの中からはView, Controllerのオブジェクトを参照することはなく，
+View, Controllerの方から参照されるようになっていることが分かると思います．-->
+</p>
+
+
+<img src="diagram/class_diagram0.gif" width=700/>
+
+<p>
+クラス図にさらに多くの情報を含めたい場合，クラスの箱の中に以下のように
+フィールドとメソッドを記述する方法もあります．この場合，<code>public</code>，<code>protected</code>，<code>private</code>を区別するために，メソッド(フィールド)名の前に，それぞれ+, #, -をつけます．継承したクラスでは，そのクラスで(再)定義したメソッド，フィールドのみを書きます．
+</p>
+
+<img src="diagram/class_deluxe.gif" width=400/>
+
+<div id="final-report" class="rep">
+<h1>J3レポート課題：ドローエディタの拡張</h1>
+
+<p>
+上でサンプルコードを示した簡易ドローエディタにさまざまな改良を加えてください．
+最低限，以下の2つの改良は行なって下さい．
+</>
+
+<dl>
+  <dt>色の指定</dt><dd>赤以外の色を指定できるようにする．あらかじめ基本色を決めておいてよい．</dd>
+  <dt>図形の追加</dt><dd>四角形以外の図形を描画できるようにする．</dd>
+</dl>
+
+<p>
+さらに，できれば以下に列挙するような改良にもチャレンジしてください．もちろん，これら以外の改良を自分なりに考えてもらっても結構です．できるだけ使いやすいドローエディタを作ってください．あるいは，誰も思いつかないような奇抜なドローエディタを完成させるというのも面白いでしょう．
+</p>
+
+<dl>
+  <dt>図形の保存と読み込み</dt>
+  <dd>なるべく，ストローク形式(図形の種類，位置や大きさの情報を保存する形式)と，画像ファイル形式(BMP，PNG，JPEGなど)の両方をサポートしましょう．<a href="faq4.html">FAQ(4回目)</a>の最初に方法が書いてあります．</dd>
+  <dt>図形の選択</dt>
+  <dd>何らかの方法で描画済みの図形を選択する方法を考える．選択された図形は選択されていることがわかるような表示にする必要がある．</dd>
+  <dt>図形の編集</dt>
+  <dd>選択した図形に，移動，変形，削除，色の変更などの編集を行なう．</dd>
+  <dt>グリッド</dt>
+  <dd>画面上に仮想的な格子を考え，図形の位置，大きさがその格子に合うようにする．さらに，格子の表示/非表示ができるとよい．</dd>
+  <dt>図形の複数選択</dt><dd></dd>
+  <dt>図形の整列</dt>
+  <dd>複数選択した図形を整列させる．</dd>
+  <dt>グループのサポート</dt>
+  <dd>複数の図形を一つのグループにまとめる機能．グループ全体を移動，変形することが可能．</dd>
+  <dt>JColorChooserを利用した色の選択</dt><dd></dd>
+  <dt>操作の取消し(undo)</dt><dd></dd>
+  <dt>アニメーションの導入</dt>
+  <dd>アニメーションエディタ．(例えばPowerPointのアニメーションのような感じで)図形を動かせるようにする．マウスドラッグでスピード指定をして，図形を投げられるエディタなど．</dd>
+</dl>
+
+<p>
+<a href="faq4.html">FAQ(4回目)</a>
+にもヒントが書いてありますので，参考にして下さい．</p>
+
+<p>
+以下，最低限の二つの改良について補足します．
+</p>
+
+<h3>色の指定</h3>
+
+<ul>
+  <li>何らかの部品(<a href="http://docs.oracle.com/javase/jp/8/docs/api/javax/swing/JComboBox.html"><tt>JComboBox</tt></a>，<a href="http://docs.oracle.com/javase/jp/8/docs/api/javax/swing/JColorChooser.html"><tt>JColorChooser</tt></a>等)を使って，色を選択できるようにします．少なくともred，green，blueの3色は選択できるようにしましょう．</li>
+  <li>部品で色を選択すると，選択した色が<code>DrawModel</code>の<code>currentColor</code>フィールドにセットされるようにします．そうすると，その色で四角形が描画されるようになります．</li>
+</ul>
+
+<h3>図形の追加</h3>
+
+<p>
+四角形以外に，例えば，丸，直線，塗り潰した四角形などが描けるようにします．
+</p>
+
+<ul>
+  <li>各図形を表すクラスを<code>Figure</code>クラスのサブクラスとして作ります．場合によっては，インスタンス変数を追加する必要があるかもしれません．</li>
+  <li>何らかの部品(<a href="http://docs.oracle.com/javase/jp/8/docs/api/javax/swing/JComboBox.html"><tt>JComboBox</tt></a>，<a href="http://docs.oracle.com/javase/jp/8/docs/api/javax/swing/JMenuBar.html"><tt>JMenuBar</tt></a>等)を使って図形を選択します．</li>
+  <li>元のプログラムでは，<code>DrawModel</code>の<code>createFigure</code>メソッドで，必ず<code>RectangleFigure</code>を生成していますが，そこで現在選択されている図形のオブジェクト(例えば，<code>CircleFigure</code>や<code>LineFigure</code>)を生成するようにします．</li>
+</ul>
+
+<h3>レポート作成上の注意点</h3>
+
+<ul>
+  <li>レポートでは，追加した機能のプログラムだけでなく，<b>改良済みのドローエディタのプログラム全体について</b>説明してください．つまり，今回はレポートの書き方の練習でもあるため，あたかも自分で一から全部作ったかのように，レポートではプログラムのすべてについて説明してください．</li>
+  <li>Javaに詳しい人は，こちらが与えたプログラムを利用しないで，同様の機能を果たすプログラムを一からすべてを作ってもかまいません．</li>
+</ul>
+
+<p>
+詳しくは，<a href="report.html">「レポート提出について」</a>を熟読して下さい．
+</p>
+
+</div>
+
+<hr/>
+<i>電気通信大学 情報理工学部 情報・通信工学科 5学期 MICS実験第一 資料</i>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML//EN">
+<html> <head>
+<!-- (C)2011 K.Yanai (UEC) -->
+<META name="robots" content="noindex,nofellow">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=UTF-8">
+<title>J3課題 第2回目 FAQ</title>
+<link href="https://fonts.googleapis.com/css?family=Lato:400,700|Noto+Sans+JP:400,700" rel="stylesheet">
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+<LINK rel="stylesheet" href="../oop-new.css" type="text/css">
+</head>
+
+<body>
+<h1>J3課題 第2回目 FAQ</h1>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+<h2>Q. ウィンドウの右上に「×」がありません．</h2>
+
+<P>
+おそらく，CED標準のtwmをウィンドウマネージャーとして使っていると思われます．twmでは「×」は表示されませんので，せっかく<code>setDefaultCloseOperation()</code>を実行しても，ウィンドウを閉じる「×」ボタンがなくて，意味がありません．
+</p>
+
+<p>
+一番簡単なのは，twm以外のウィンドウマネジャーのGNOMEかKDEを使うことです．
+</p>
+
+<p>
+ログイン画面のセッションメニューでGNOMEかKDEを選択してから，ログインしましょう．
+</p>
+
+<hr>
+
+<h2 id="font">Q. HTMLを使わずに，Swing本来の方法で文字や背景の色，文字の大きさを変えるにはどうすればいいですか？ </h2>
+
+<p>
+HTML文を使うのは簡単で便利ですが，たしかに本来のSwingの方法ではありません．本来の方法も説明しておきましょう．以下に説明する内容は，<code>JLabel</code>だけでなく，<code>JButton</code>でも使えます．
+</p>
+
+<p>
+まず色の変更の方法:
+</p>
+
+<pre class=ref>
+label.setForeground(Color.red);   // 文字の色を赤に設定
+label.setOpaque(true);            // 背景の非透明化
+label.setBackground(Color.green); // 背景を緑に設定
+</pre>
+
+<p>
+色は<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/awt/Color.html"><tt>Color</tt></a>クラスの定数で指定します．定数の一覧は，<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/awt/Color.html#field.summary">ここ</a>にありますので参照してください．この中にない色は，以下のように<code>Color</code>クラスのオブジェクトをRGB (Red, Green, Blue)の3つの値(0〜255)を指定して生成し，引数で渡してやることで指定可能です．
+</p>
+
+<p>
+なお，背景はデフォルトが透明なので，背景色を指定しても表示されません．背景に色をつける場合には，必ず<code>setOpaque(true)</code>を実行して背景を非透明化してください．
+</p>
+
+<pre class="ref">
+label.setForeground(new Color(100, 0, 255)); // 文字の色を設定
+label.setOpaque(true);                       // 背景の非透明化
+label.setBackground(new Color(0, 255, 128)); // 背景色を設定
+</pre>
+
+<p>
+次は文字サイズです．<code>setFont</code>を使います．
+</p>
+
+<pre class="ref">
+// Serifフォントで，標準スタイル，20ポイント 
+label.setFont(new Font(Font.SERIF, Font.PLAIN, 20);
+// SansSerifフォントで，太字スタイル，10ポイント 
+label.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 10);
+ // 等幅フォントで，イタリックスタイル，15ポイント 
+label.setFont(new Font(Font.MONOSPACED, Font.ITALIC, 20);
+</pre>
+
+<p>
+また，次のように<code>Font</code>の第一引数にフォント名を文字列で直接書くことも出来ます．ただし，システムによって利用可能なフォントが違いますので，Windowsでは表示されるけどUnix上では文字が表示されないということが起こりますので，注意して下さい．<a href="../code/CheckFont.java"><tt>CheckFont.java</tt></a>を実行するとそのシステムで利用可能なフォントの一覧が表示されるので，確認してから利用してみてください．
+</p>
+
+<pre class="ref">
+// Arialフォント
+label.setFont(new Font("Arial", Font.PLAIN, 20);
+// MS Pゴシックフォント(通常Windowsにしか入っていない)
+label.setFont(new Font("MS Pゴシック", Font.PLAIN, 20);
+</pre>
+
+<p>
+他にも色々な文字の表示の仕方を指定可能です．<a href="http://www.javadrive.jp/tutorial/jlabel/">【Swingを使ってみよう-ラベルの作成(JLabelクラス)】</a>を参考にしてみましょう．
+</p>
+
+<div class="alert alert-info" role="alert">
+  <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+  <span class="sr-only">Tips:</span>
+ちなみに，このような「Javaで○○したいけどどうすればいい？」という疑問はネットで調べればすぐに解決すると思います．今回の質問は，例えば「<tt>JLabel</tt> 文字サイズ変更」「<tt>JLabel</tt> 色変更」などとGoogleで検索してみればすぐに調べられると思います．どうすればいいか分からないときはとりあえずネット検索してみてください．それでも分からないときは，よく知っている友人やTAに聞いてみましょう．
+</div>
+
+<hr/>
+<i>電気通信大学 情報理工学部 情報・通信工学科 5学期 MICS実験第一 資料</i>
+</body>
+</html>
+
+

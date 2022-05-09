@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML//EN">
+<html> <head>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=UTF-8">
+<link href="https://fonts.googleapis.com/css?family=Lato:400,700|Noto+Sans+JP:400,700" rel="stylesheet">
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="../oop-new.css" type="text/css">
+<title>スクリーンショットのLaTeXへの埋め込み方法</title>
+</head>
+
+<body>
+<h1>図のLaTeX文書中への埋め込み方法</h1>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+<h2>EPSファイルの生成方法</h2>
+
+<p>
+LaTeXの文章中に画像を埋めこむには，EPS形式の画像ファイルが必要です．GIFやJPEGなどの形式のファイルをEPS形式のファイルへ変換するには，<code>convert</code>コマンドを利用します．たとえば，
+<pre class="ref">
+convert graph.gif graph.eps
+</pre>
+とすれば，GIFファイルをEPSファイルに変換できます．
+</p>
+ 
+<h2>ウィンドウのスクリーンショットをEPSファイルにする方法</h2>
+
+<p>
+画面上に表示されているある1つのウィンドウのスクリーンショットをEPS形式のファイルにする方法をここで説明します．CEDの場合，方法はいろいろありますが，ここでは2つの方法を説明します．
+</p>
+
+<dl>
+<dt><code>xwd</code>コマンドを用いる</dt>
+<dd>
+まず：
+<pre class="ref">
+xwd &gt; screen.xwd
+</pre>
+として，<code>xwd</code>コマンドを実行します．次に，取り込みたいウィンドウをマウスでクリックすると，その画像が<code>screen.xwd</code>という名前のファイルに格納されます．そのままではLaTeXに貼りつけることはできないので：
+<pre class="ref">
+convert screen.xwd screen.eps
+</pre>
+として，EPS ファイルに変換します．これがもっとも簡単な方法でしょう．
+</dd>
+<dt><code>display</code>コマンドを用いる</dt>
+<dd>
+ウィンドウがあらわれるので，左クリックしてメニューを表示させます．次に，<code>save</code>を選択し，現れたウィンドウの左下の<code>grab</code>ボタンを押します．そして，取り込みたいウィンドウをクリックします．そうすると，<code>display</code>コマンドのウィンドウにそのウィンドウの画像が取り込まれます．あとは，<code>save</code>コマンドを用いてEPS形式として保存します．保存する前に，<code>display</code>コマンドの様々な画像処理機能を用いて，画像を加工することも可能です．
+</dd>
+</dl>
+
+図を手で書いて文書中に埋めこみたい場合は，ドローエディタの<code>tgif</code>コマンドを使って，EPSファイルを作成して下さい．
+
+<h2>EPSファイルのLaTeXへの埋め込み方法</h2>
+
+<p>
+CEDで使えるLaTeXには，<code>documentclass</code>で書きはじめるpLaTeX(LaTeX2e)と，<code>documentstyle</code>で書きはじめるjLaTeX(LaTeX209)の2つのバージョンがあります．前者のほうが新しいバージョンなので，必ずpLaTeXを使うようにしましょう．
+
+<dl>
+<dt>pLaTeX (LaTeX2e) の場合</dt>
+<dd>
+<p>
+LaTeXソースファイルの先頭に：
+</p>  
+
+<pre class="ref">
+\documentclass[11pt,a4j]{jarticle}
+\usepackage[dvips]{graphicx}
+</pre>
+
+<p>
+と書いて，<code>graphicx</code>パッケージの利用宣言をします．画像を埋めこむには：
+</p>
+
+<pre class="ref">
+\begin{figure}[htbp]
+  \begin{center}
+    \leavevmode
+    \includegraphics[width=0.5\textwidth]{kadai1.eps}
+    \caption{課題2-1のプログラムの実行画面．}
+    \label{fig:kadai1}
+  \end{center}
+\end{figure}
+</pre>
+
+<p>
+などとすればよいでしょう．<code>width=0.5\textwidth</code>は画像の横幅の指定で，文章の横幅の半分に指定しています．0.5を変えて，適当な大きさにしてください．<code>width=5cm</code>のように直接大きさを指定することもできます．
+</p>
+<p>
+ラベルを<code>\label{fig:kadai1}</code>と定義しておけば，文章中で<code>\ref{fig:kadai1}</code>として図の番号を参照できます．「図\ref{fig:kadai1}に実行結果を示す．」というように利用するとよいでしょう．
+</p>
+</dd>
+<dt>jLaTeX (LaTeX209) の場合</dt>
+<dd>
+
+<p>
+LaTeXソースファイルの先頭に：
+</p>  
+
+<pre class="ref">
+\documentstyle[epsf,11pt,a4j]{jarticle} 
+</pre>
+
+<p>
+と書いて，画像を埋めこみたい場所で以下のように記述してください．
+</p>
+  
+<pre class="ref">
+\begin{figure}[htbp]
+  \begin{center}
+    \leavevmode
+    \epsfile{file=kadai1.eps,width=0.5\textwidth}
+    \caption{課題2-1のプログラムの実行画面．}
+    \label{fig:kadai1}
+  \end{center}
+\end{figure}
+</pre>
+</dd>
+</dl>
+
+<hr/>
+<i>電気通信大学 情報理工学部 総合情報学科 4学期 プログラミング演習 資料
+</body>
+</html>

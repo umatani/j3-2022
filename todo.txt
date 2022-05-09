@@ -1,0 +1,31 @@
+[クリティカル]
+
+* 1.html:
+  <a href="http://jikken.cs.uec.ac.jp/j3/eclipse/eclipse.html">柳井先生による解説ページ</a> がない．
+* 2.html:
+  - 「Javaの道 インタフェース」がない．
+
+* text/uec_lec2018_?.pdf のソース(ppt?)があれば欲しい．
+
+[misc]
+
+* フォント美化
+  * index, 1234, faq1234, turtle, report, screen
+
+* 改行の削除
+  * 1
+
+* 、。 → ，．
+  * 1
+
+* <code>
+  * 1
+
+* red -> <em>
+  * 1
+
+* 大文字タグの小文字化
+  * index, 1
+
+* argv -> args
+  * 1

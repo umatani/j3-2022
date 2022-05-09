@@ -1,0 +1,66 @@
+//
+//  JToolBar sample source code
+//
+
+import java.io.File;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+
+public class FileChooser3 extends JFrame {
+  JFileChooser chooser = new JFileChooser();
+  // ICON の gif file(*.gif)は，
+  // /usr/java/jdk1.3.1_02/demo/jfc/Notepad/resources/ や
+  // /usr/java/jdk1.3.1_02/demo/jfc/Stylepad/resources/ にあります．
+  // 実行時に *.gif が必要ですので，注意してください．
+  JButton button1 = new JButton(new ImageIcon("open.gif"));
+  JButton button2 = new JButton(new ImageIcon("save.gif"));
+  JButton button3 = new JButton("exit");
+  JToolBar tb = new JToolBar();
+
+  public FileChooser3() {
+    super("Simple File Chooser Application");
+    button1.setActionCommand("load");
+    button2.setActionCommand("save");
+    button3.setActionCommand("exit");
+    tb.add(button1);
+    tb.add(button2);
+    tb.add(button3);
+    getContentPane().add(tb,BorderLayout.NORTH);		
+    setSize(300,300);
+
+    ActionListener al = new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	int state=0;
+	if (e.getActionCommand().equals("load"))
+	  state = chooser.showOpenDialog(null);
+        else if (e.getActionCommand().equals("save"))
+	  state = chooser.showSaveDialog(null);
+	else
+	  System.exit(0);
+
+        File file = chooser.getSelectedFile();
+        if(file != null && state == JFileChooser.APPROVE_OPTION)
+          System.out.println("file name:"+file.getPath());
+        else if(state == JFileChooser.CANCEL_OPTION)
+          System.out.println("canceled");
+        else if(state == JFileChooser.ERROR_OPTION) 
+          System.out.println("error");
+      }
+    };
+    button1.addActionListener(al);
+    button2.addActionListener(al);
+    button3.addActionListener(al);
+  }
+  
+  public static void main(String args[]) {
+    JFrame f = new FileChooser3();
+    f.addWindowListener(new WindowAdapter(){
+      public void windowClosing(WindowEvent e){
+        System.exit(0);
+      }
+    });
+    f.show();
+  }
+}
+

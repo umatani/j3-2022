@@ -1,0 +1,1239 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML//EN">
+<html> <head>
+<!-- (C)2012 K.Yanai (UEC) -->
+<meta name="robots" content="noindex,nofellow">
+<meta http-equiv="Content-Type" content="text/html; CHARSET=UTF-8">
+<link href="https://fonts.googleapis.com/css?family=Lato:400,700|Noto+Sans+JP:400,700" rel="stylesheet">
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="../oop-new.css" type="text/css">
+
+<script type="text/javascript" src="../ans.js"></script>
+
+<script type="text/javascript" src="js/shCore.js"></script>
+<script type="text/javascript" src="js/shBrushJava.js"></script>
+<script type="text/javascript" src="js/shBrushCpp.js"></script>
+<link href="css/shCore.css" rel="stylesheet" type="text/css" />
+<link href="css/shCoreDefault2.css" rel="stylesheet" type="text/css" />
+<link href="css/shThemeDefault2.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript">
+     SyntaxHighlighter.all()
+</script>
+
+<title>J3課題 第1回目</title>
+</head>
+
+<body>
+<h1>J3課題 (第1回目)</h1>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+<p>
+今回は初回ですので，Javaのプログラミング言語としての特徴を学んだ後，Javaの基本的な使い方を演習します．まずC言語とJavaで同じプログラムを書いて比較してみます．続いてコンパイル・実行を行って，実際にプログラムの作成から実行までを体験してみます．
+</p>
+
+<h2>Javaの基本構文</h2>
+
+<h3>Javaの特徴</h3>
+
+<p>
+本演習ではオブジェクト指向言語ののJava基礎について学習します．第1回目の今回はまず最初に簡単にC言語との違いについて学習し，次に「オブジェクト指向」言語としての特徴であるクラスについて学習します．
+</p>
+
+<p>
+Java言語は，1995年にサン・マイクロによって開発された新しいプログラム言語です．オブジェクト指向を基本としていますが，CやC++と同じ構文を多く採用していて，基本データ型や演算子などはCのものがそのまま利用されていて，Cを知っている人にとっては習得しやすい言語と言えるでしょう．CやC++と大きく異なる点として，以下のようなことが挙げられます．
+<ul>
+<li>ポインタがない．</li>
+<li>メモリ管理の自動化，<code>free</code>でメモリを解放する必要がなくガーベジコレクションを行う．</li>
+<li>大規模なクラスライブラリ，標準でGUI，I/O，ネットワーク，マルチスレッドなどのライブラリを備える．</li>
+<li>コンパイラが中間コード(バイトコード)を生成．実行する際はJavaインタプリタ(仮想マシン)を用いる．</li>
+<li>マルチプラットフォーム(Windows，LinuxからPDA，携帯電話，Androidでも動く)．</li>
+<li>Javaアプレットを作成することによって，Webブラウザ上で実行可能．</li>
+</ul>
+</p>
+
+<p>Java言語ではマルチプラットフォームに対応するために，JavaコンパイラはCの様にそのまま実行可能なネイティブコードではなく，中間コード(バイトコード) を生成します．そして，そのバイトコードを実行する際はJavaインタプリタ(仮想マシン)を用います．そのため，Java仮想マシンがあれば，どのような環境であっても，Javaコードが実行可能です．実際に，Windows上でコンパイルして生成した中間コードはLinux上でも実行可能です．(ただし，実際には画面の大きさやキーボードの有無などの制約があるので，スマートフォンや携帯電話ではパソコン用のコードを実行させることは通常できません．)
+</p>
+
+<img src="java.gif" width=700/>
+
+<p>
+Javaには，Webブラウザ上で実行するJava アプレットという実行形式と，Cの実行ファイルなどと同様にコマンドラインから実行する通常のJavaアプリケーションと言う形式があります．JavaアプレットはWebページに張り付けることを前提としているので，セキュリティ上の制約があって，ファイルにアクセス出来ないなどの制限があります．一方，JavaアプリケーションはすべてのJavaの機能を利用することができます．したがって，本実験では，Javaアプレットについては扱いません．ですが，GUIを用いたJavaアプリケーションのプログラムをJavaアプレットのプログラムに変更することは容易ですので，興味のある人は自力で行ってみてください．なお，JavaScriptは，名前にJavaは付いていますが，Javaの文法を一部採り入れたWebブラウザ用のスクリプト言語で，基本的に別の言語と考えた方がいいでしょう．
+</p>
+
+<h3>Javaのプログラム</h3>
+
+<p>
+次に実際にC言語とJavaのサンプルプログラムを比較しながら，その違いについて学習しましょう．まずは，うるう年を表示するプログラムをC言語で示します．
+</p>
+
+<pre class="brush: cpp">
+#include &lt;stdio.h&gt;
+#define TRUE  1
+#define FALSE 0
+#define START 1990
+#define END   2110
+
+int isleap(int y) {
+  if (((y % 4 == 0) && (y % 100 != 0)) || (y % 400 == 0))
+    return TRUE;
+  else
+    return FALSE;
+}
+
+main() {
+  int year;
+  for (year = START; year &lt;= END; year++) {
+    if (isleap(year)) /* found a leap year */
+      printf(" %d", year);
+  }
+  printf("\n");       /* line feed */
+}
+</pre>
+
+<p>
+以下は同様のプログラムをJavaで書いたものです．
+</p>
+
+<pre class="brush: java">
+class Leap {
+  static final int START = 1990;
+  static final int END   = 2110;
+
+  static boolean isleap(int y) {
+    if (((y % 4 == 0) && (y % 100 != 0)) || (y % 400 == 0))
+      return true;
+    else
+      return false;
+  }
+
+  public static void main(String[] args) {
+    for (int year = START; year &lt;= END; year++) {
+      if (isleap(year))    /* found a leap year */
+        System.out.print(" " + year);
+    }
+    System.out.println();  // line feed 
+  }
+}
+</pre>
+
+<p>
+2つを見比べてみると，ほとんどは同じですが，細かい部分に違いがあることが分かるでしょう．まず，プログラムの書き出しが，Java の方では，<code>class Leap</code>になっています．Javaのプログラムでは，必ず１つ以上のクラスが存在しないといけません．ここでは，<code>Leap</code>という名前のクラスが１つ存在していて，1行目で始まった括弧が最後の19行目で閉じられていることから分かるように，プログラム全体がクラスになっています．
+</p>
+
+<p>
+クラスは，本来はオブジェクト指向におけるオブジェトのひな形の役目を果たしますが，このサンプルはオブジェクト指向言語としてのJavaの特徴をまったく利用していないので，ここでのクラスは形式的な利用にとどまっています．Java本来のクラスの利用法は次回説明します．
+</p>
+
+<p>
+次に12行に注目してください． <code>public static void main(String[] args)</code>となっていますが，ここでは<code>main</code>メソッドを定義しています．<em>メソッド(method)</em>とは，とりあえずC言語の関数のようなものだと考えてください．詳細は後述します．C言語と同様にプログラムの実行は<code>main</code>メソッドから始まります．<code>main</code>メソッドはプログラム全体で１つのみ定義できます．Cとは異なり，<code>main</code>の前に，<code>public static void</code>が付き，引数に<code>String[] args</code>をとります．これは少し長くて面倒ですが，どちらも省略できないので覚えてしまってください．C言語だと，<code>main</code>関数は，引数を省略して<code>main()</code>，省略しないで<code>main(int argc, char **argv)</code>と２通りの書き方がよく用いられますが，Javaの場合は引数の型も厳密に決まっていますので，かならず12行目の様に書く必要があります．このことは必ず覚えておいてください．
+</p>
+
+<p>
+まとめると，クラスが１つの場合，Javaのプログラムは以下のようになります．
+</p>
+
+<pre class="ref">
+class クラス名 {
+  変数定義やmain以外のメソッドの定義
+  ...
+  public static void main(String[] args) {
+    mainメソッドの中身
+    ...
+  }  
+
+  変数定義やmain以外のメソッドの定義
+  ...
+}
+</pre>
+
+<p>
+  上記以外の相違点としては，2,3行目の定数の定義の仕方，5行目の<code>boolean</code>型，7,9行目の返り値の<code>true</code>，<code>false</code>があります．定数はC言語では，<code>#define</code>と<code>const</code>を用いる2通りの方法がありましたが，Javaでは<code>final static</code>という修飾子を<code>int</code>の前に付けます．<code>final static</code>は後から値が変更されないという意味で，C言語の<code>const</code>とほぼ同じ意味になります．<code>boolean</code>型は，<code>true</code>，<code>false</code>の2値を取る変数の型です．C言語では：
+</p>
+
+<pre class="ref">
+#define TRUE  1
+#define FALSE 0
+</pre>
+
+<p>
+として<code>int</code>型が用いられていましたが，Javaには<code>true</code>/<code>false</code>だけの値をとる専用の型があります．
+</p>
+
+<p>
+5行目では <code>boolean</code>型のメソッドを定義していますが，<code>boolean</code>の前に<code>static</code>がついています．<code>main</code>メソッドに<code>static</code>がついているため，<code>main</code>メソッドから(クラスのメソッドとしてではなく)直接呼び出すメソッドは，<code>static</code>を最初に付けないといけないと覚えておいてください．
+</p>
+
+<p>
+15, 17行目では画面(標準出力)に結果の出力を行っています．15行目の引数は<code>" "+year</code>となっていますが，これは<code>year</code>の前にスペース(<code>" "</code>)を1文字表示するということです．ここでの<code>+</code>は文字列の結合です．<code>year</code>は<code>int</code>型(整数型)ですが，文字列を<code>+</code>されると自動的に<code>year</code>も文字列になって，<code>year</code>の値の後ろにスペースが1つ追加された文字列が画面に出力されます．
+</p>
+
+<p>
+17行目はメソッド名<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/io/PrintStream.html#println-java.lang.String-"><tt>System.out.println</tt></a>の最後のlnが示すように，改行を出力しています．これは，<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/io/PrintStream.html#print-java.lang.String-"><tt>System.out.print</tt></a><tt>("\n");</tt>と書くことも出来ます．
+</p>
+
+<p>
+JDK 5.0 以降では，C言語と同様の printf が使えます．例えば，<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/io/PrintStream.html#printf-java.lang.String-java.lang.Object...-"><tt>System.out.printf</tt></a><tt>("%3d %4d\n", a, b);</tt>の様に書くことも出来ます．
+</p>
+
+<p>
+他に細かい違いとしては，13行目で<code>for</code>の中で<code>int year = 0;</code>と変数の定義が出来る点，17行目で書いているように<code>//</code>でコメントを書ける点があります．C言語と同様の<code>/* ... */</code>も利用できますが，<code>//</code>を使えば，その行の終わりまでがコメントになりますので，簡単なコメントの場合はこちらの方が便利です．C++言語を知っている人は気づいたかも知れませんが，これらはC++言語と同じです．ただし，C言語と違ってプリプロセッサはありませんので，<code>#ifdef</code>などは使えません．
+</p>
+
+<h3>コンパイルと実行</h3>
+
+<p>
+では，サンプルプログラムを実行しましょう．ここでは，ファイル名を<code>Leap.java</code>とします．今までのC言語の演習の時と同様に，Emacsなどのエディタで入力してください．もしくは，<a href="../code/1/Leap.java"><tt>Leap.java</tt></a>を右クリックで「名前を付けてリンク先を保存」を選択してダウンロードして下さい．
+</p>
+
+<p>
+<code>Leap.java</code>のファイルの準備ができたら，コンパイルは以下のようにします．
+</p>
+
+<div class="alert alert-danger" role="alert">
+  <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+  <span class="sr-only">Warning:</span>
+  提出が必要な課題ではありませんが，各自で必ずコンパイルして，実行してみてください．
+</div>
+
+<pre class="ref">
+javac Leap.java
+</pre>
+<p>
+エラーメッセージが表示されなければOKです．これで，<code>Leap.class</code>というファイルが生成されているはずです．ここで注意することは，<code>javac</code>でコンパイルして出力されるファイル名は，<strong>ソースファイル名にかかわらず，ソースファイル中のクラス名に"<code>.class</code>"をつけたものとなります．試しに，ファイル名を<code>Leap.java</code>ではなく，<code>samp.java</code>にしてコンパイルしてみましょう．</strong></p>
+
+<div class="alert alert-danger" role="alert">
+  <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+  <span class="sr-only">Warning:</span>
+  どうなるか各自で必ず試してみて下さい．
+</div>
+<!--クラスが２つあれば，classファイルも２つ出来ます．-->
+
+<p>
+次に実行してみましょう．実行するときは以下のようにします．
+</p>
+<pre class="ref">
+java Leap
+</pre>
+<p>
+これで，Javaプログラムが実行できました．<code>java</code>コマンドは，Javaのバイトコードを解釈するためのインタプリタの役目を果たしています．C言語のコンパイル時はネイティブコードが生成されるので，実行ファイル名のみで実行可能でしたが，Javaの場合は必ずJavaインタプリタのコマンド名の後にクラス名を指定することになっています．</p>
+<p>
+なお，ここで注意するのは，"<code>.class</code>"をつけてはいけないことです．<code>main</code>メソッドの含まれるクラス名を指定します．コンパイル時には，必ず "<code>.java</code>"を付けることになっていますので，混同しないようにきを付けてください．</p>
+
+<h3>Eclipseの利用</h3>
+
+<p>
+CEDには，Javaの統合開発環境であるEclipse(エクリプス)がインストールされています．統合開発環境とは，エディタ，Javaコンパイラ，デバッガが一体となったものです．メソッド名の候補を表示してくれたり，プログラムの作成途中でもエラーを教えてくれるなど，便利な機能が満載ですので，これ以降はEclipseを使いましょう．</p>
+
+<p>
+Eclipseの詳しい使い方は「Eclipse 入門」などとネット検索すればいくらでも見つかるでしょう．<!-- <a href="http://jikken.cs.uec.ac.jp/j3/eclipse/eclipse.html">柳井先生による解説ページ</a>にあります．それを見ながら，--><code>Leap.java</code>を今度はEclipseを使って作って実行してください．以下はJ3課題用の補足です．
+</p>
+
+<ul>
+<li>ワークスペースの名前は何でもかまいませんが，J3課題を通して同じワークスペースを使うことになるので「<自分のホームディレクトリ>/j3java」などがよいでしょう．</li>
+<li>プロジェクトはプログラム毎に作りましょう．今回はプロジェクト名を「Leap」とします．</li>
+<li>プログラムは Hello world ではなく，うるう年の計算プログラムにしてください．クラス名にも<code>Leap</code>を指定します．</li>
+<li>作ったプログラムはワークスペースディレクトリの中にあるプロジェクトディレクトリの中にあるsrcディレクトリにあります．</li>
+</ul>
+
+<!--<h3>Cとの構文に関する相違点</h3>
+<P>
+以下にCと共通する構文についてあげます．
+</P>
+<UL>
+<LI>数値変数の型(int, short, long, float, double, char) &nbsp; &nbsp;<font
+size=-1><a href="6.html#primitive">(データ型の一覧表)</a></font>
+<LI>for, while, do..while, if, swich..case などの制御構造
+<LI>演算子(四則演算，比較演算子)
+</UL>
+<P>
+次に大きな違いをあげます．
+</P>
+<UL>
+<LI>ポインタがない
+<LI>配列の定義の仕方が異なる．
+<LI>boolean 型，Stringクラスがある
+<LI>クラスがある
+<LI>プリプロセッサがない
+</UL>
+<P>
+ここで，配列の定義について簡単にふれます．Cでの int a[100]; double b[10][10];を
+javaで行うには，
+</P>
+<pre class=ref>
+int a[] = new int[100];
+double b[][]= new double[10][10];
+</pre>
+<P>
+とします．使い方は，Cと同様に a[10]=0; b[3][3]=0.5; のようにします．<br>
+newは，C言語でのmalloc()関数のようなもので，メモリを動的に確保する命令です．
+a[ ]やb[ ][ ] は．C言語でのポインタ変数に相当すると考えることができます．
+Javaで配列を使うには必ずnewによって配列の実際のメモリ領域を確保して
+やることが必要です．
+</p>
+
+<div class=rep>
+<h1>練習問題1  
+&nbsp;&nbsp;&nbsp;
+<INPUT type="button" value="解答提出" onClick="answer(1,1)" style="font-size:large;">
+&nbsp;&nbsp;&nbsp;
+(プログラムに加えて，実行結果も提出してください)
+</h1>
+
+<P>
+<a href="http://docs.oracle.com/javase/jp/6/api/java/lang/Math.html#random()">関数random()</a>を用いると乱数を得ることができます．次のようにすると，変数rに0.0から1.0までの乱数が一つ得られます．
+</P>
+<pre class=ref>
+double r = Math.random();
+</pre>
+<P>
+この乱数を使って，
+リターンキーを押すと，good, so so, badのいずれかをプリントする
+おみくじプログラムを作ってください．
+</p><P>
+例えば，次のようにします．</P>
+<ul>
+  <li>乱数の値が0.7より大きければgood
+  <li>乱数の値が0.2より大きく，0.7以下ならばso so
+  <li>乱数の値が0.2以下ならばbad
+</ul>
+<p>
+なお，キーの入力は，文字入力関数の
+<a href="http://docs.oracle.com/javase/jp/6/api/java/io/InputStream.html#read()">
+read()</a>を用います．関数read()では <a href="faq1.html#trycatch">例外処
+理(try...catch)</a>をする必要があります．
+それをmain関数の中に入れて，さらに
+class Omikuji の中に入れると以下のようになります．
+ファイル名も Omikuji.java としましょう．</P>
+<pre class="brush: java">
+  class Omikuji {
+    public static void main(String[] args) {
+      int val;
+      try{
+        while(true){
+          val = System.in.read();
+          処理 (乱数の生成，おみくじの判定，結果表示)
+          ...
+        };
+      }catch(java.io.IOException e){ return; }
+    }  
+  }
+</pre>
+<P>
+キーコードが val に入力されますが，ここではvalの
+値は使わなくて構いません．無限ループで構いませんので，
+whileの終了条件は true とします．この場合は，CTRL+c を
+押してプログラムを終了することになります．
+</P>
+
+<P>
+次に処理部分に，乱数の発生と，if文による
+条件分岐，それぞれの条件毎に System.out.println("メッセージ");
+によるメッセージ出力を追加して下さい．なお，
+if文や 条件式は次のように基本的にC言語と同一です．
+もちろんif文のelse以下は省略も可能です．</P>
+<pre class=ref>
+  if (条件式1)      { 条件1成立時に実行 }
+  else if (条件式2) { 条件2成立時に実行 }
+  else              { 条件不成立時に実行 }
+
+  主な条件式
+  a &gt; b    a &gt;= b  
+  a &lt; b    a &lt;= b  
+  a == b   a != b
+</pre>
+</div>
+-->
+
+<h2>オブジェクト指向とクラス</h2>
+
+<p>
+ここまでは，単にC言語をJavaにそのまま置き換えただけでしたが，それではJavaプログラミングとはいえません．Javaの大きな特徴は「オブジェクト指向言語」であることです．通常，Javaではオブジェクトを中心に考えてプログラミングしていく，「オブジェクト指向プログラミング」を行います．これが，Javaらしいプログラミングスタイルと言えます．
+</p>
+
+<p>
+では，ここからはいよいよ「オブジェクト指向」について学んでいきましょう．初めて習う考え方なので，最初はピンとは来ないかも知れませんが，本演習でのJavaでのプログラミングを通して，徐々に「オブジェクト指向」に慣れていきましょう．
+</p>
+
+<h3>オブジェクト指向</h3>
+
+<p>
+これから学んでいくJava言語は，「オブジェクト指向」に基づくプログラミング言語です．オブジェクト指向は，システムをモデル化するための技法の一つで，システムを相互にやりとりする多くのオブジェクトの集合として考える手法です．
+</p>
+
+<p>
+オブジェクトとは，実世界の「もの」「役割」を抽象化した概念で，コンピュータで取り扱う問題の中に存在する対象をそのままプログラミングの基本単位として表現する方法です．オブジェクトでは，データとそのデータを操作するための手続きが一体となっているという特徴があります．
+</p>
+
+<p>
+今まで習ってきたC言語によるプログラミングでは，主にシステムを機能単位で分割して，機能を実現するためのモジュールの集合としてシステムの構造の設計を行う「構造化プログラミング」が行われてきました．それに対して「オブジェクト指向プログラミング」では，機能を分割するのではなく，実世界の「もの」や「役割」にあたるオブジェクトを単位として，オブジェクトの集合としてシステムを構築します．
+</p>
+
+<p>
+以下の図に示すように，C言語に代表される手続き型言語では，プログラムに必要な機能を実現するための手続き(関数)と，データが別々に存在しています．一方，Javaに代表されるオブジェクト指向プログラミングでは，機能を実現する手続き(メソッド)とそれぞれの手続きに関係するデータをひとまとまりの単位(オブジェクト)として表現します．こうすることによって，より進んだプログラムのモジュール化が実現し，効率的なプログラミングが可能となります．
+</p>
+
+<img src="oop.png" width=600/>
+
+<p>
+オブジェクト指向言語では，メソッドと，そのメソッドが操作するデータをまとめてオブジェクトとし，これらを関係づけることでプログラムを構成します．オブジェクトは，C言語での構造体に，その構造体のデータを扱う関数を付加したものである考えることもできます．
+<!--プログラムのより進んだモジュール化と，モジュールの再利用性を高めます．-->
+<!--データとそれを操作する関数（メソッドと呼ばれる）がひとまとまりになってい
+るなって独立したものがオブジェクトで，-->
+</p>
+
+<p>
+一般にオブジェクト指向プログラミングでは，複数のオブジェクトを用意します．異なるオブジェクト同士は，メッセージをやり取りすることで協調動作します．代表的なオブジェクト指向言語としては，C++，SmallTalk，Objective-Cなどがあり，Javaもその中の１つです．
+</p>
+
+<p>
+オブジェクト指向言語におけるオブジェクトとは，</p>
+
+<ul>
+<li>自分の状態(データ)と固有のメソッド(データに対する処理手続き)を持つ．</li>
+<li>互いにメッセージを送受信しながら動作する．</li>
+<li>メッセージを受け取ったオブジェクトは，そのメッセージに対応するメソッドに従って動作し，他のオブジェクトにメッセージを送ったり，自分の状態を更新したりする．動作はその時の状態によって異なる．</li>
+<li>動的に生成，消滅する．</li>
+</ul>
+
+<p>
+つまり，オブジェクトは自立した存在で，データ構造とその操作を内部に持っているということが言えます．オブジェクトはメッセージによってのみメソッドが呼び出され，個々のオブジェクトの中身は他のオブジェクトからは直接操作することはできません．これは，<em>カプセル化</em>と呼ばれています．このように個々のオブジェクトの独立性が高いという特徴があります．
+</p>
+
+<img src="object.gif" width=600/>
+
+<h3>オブジェクトの例</h3>
+
+<p>
+今までの抽象的な説明では，良く分からない人もいると思うので，ここでもう少し具体的な例を考えてみましょう．オブジェクトを実世界の「モノ」に例えて考えてみます．
+</p>
+
+<p>
+「テレビ」オブジェクトを考えてみます．
+</p>
+
+<p>
+テレビには，内部状態として「電源ON/OFF」「チャンネル」「音量」などがあります．それを操作するメソッドとしては「電源スイッチ」「チャンネルボタン」「音量ボタン」があげられます．
+</p>
+
+<p>
+我々はテレビの中身を良く知らないのに，「電源スイッチ」「チャンネルボタン」「音量ボタン」などを用いて，「テレビ」にメッセージを送ることによって，その内部状態である「電源ON/OFF」「チャンネル」「音量」を適切にコントロールすることが出来ます．これは，「テレビ」がオブジェクトとしての特性を備えているからであると言えます．
+</p>
+
+<img src="tv.png" width=600/>
+
+<p>
+他にもエアコンや炊飯器など，世の中にある家電のほとんどが「オブジェクト」としての性質を備えています．その他，中身がよく分からなくてブラックボックスになっているけど，便利に使えるものはみんな「オブジェクト」であると言えるでしょう．
+</p>
+
+<p>
+一方，計算機に関係のあるものでは，前期に学んだ スタック(stack)，キュー(queue) などの簡単なデータ構造を思い浮かべるといいでしょう．スタックはpush, popでのみ，キューはput, getでのみデータの入出力を行います．内部の実装は配列であろうと，リストであろうと，データ構造を利用するユーザには関係なく，入力と出力のメソッドが用意されて，データ構造としての振舞いがそれぞれスタックやキューになっていれば良いわけで，まさに「オブジェクト」であるといえます．
+</p>
+
+<p>C言語でスタックを実現すると，ポインタ操作の誤りなどによってスタックの内容が書き換えられてしまう可能性がありますが，オブジェクト指向言語を用いれば，スタックの中身はメソッドを通してしか変更することができなくなります．
+</p>
+
+<p>
+テレビは映像を見るための「オブジェクト」，スタックやキューはデータを記録しておく「オブジェクト」ですが，他にも，何らかの属性(attribute)を持った物は，属性情報を内部状態であると考えると，すべてオブジェクトとして捉えることができます．例えば，皆さん自身は名前，学籍番号，学年など学生としての様々な属性情報を持っているので，「学生オブジェクト」として考えることができます．他にも教員の情報を持った「教員オブジェクト」，履修者や担当教員の情報をもった「授業オブジェクト」，所属している学生や教員の情報を持った「大学オブジェクト」など，人や人が属している組織などはすべて「オブジェクト」としての性質を持っています．
+</p>
+
+<p>
+また人だけでなくて，家電のようにブラックボックス化されている機能を持っていない物でも，ほとんどの「物」は何らかの属性を持っているので「オブジェクト」としての性質を持っています．例えば，「本オブジェクト」なら，本の名前，著者名，本の値段，出版社名など，様々な「属性」を持っています．他にも，例えば「椅子オブジェクト」なら，椅子の高さや幅，奥行き，足の本数など，やはり様々な「属性」を持っています．「オブジェクト」の元々の意味は「物」ということですので，「物」ならばほとんど例外なく「オブジェクト」としての性質を備えていると言えます．
+</p>
+
+<h3>文字列と配列</h3>
+
+<p>
+Java言語では，ほとんど全てのデータはオブジェクトです．例えば文字列や配列もオブジェクトです．
+</p>
+
+<p>
+文字列は<code>String</code>オブジェクトです．<code>String</code>オブジェクトはC言語のように文字の配列ではありません．次のようにして文字列を作ります．
+</p>
+
+<pre class="ref">
+String str = "mojiretsu";
+</pre>
+
+<p>
+文字の配列ではないので，次のC言語の例のように，配列の添字やポインタを使って文字にアクセスすることはできません．
+</p>
+
+<pre class="ref">
+printf("%c\n", str[3]);
+</pre>
+
+<pre class="ref">
+char *p = str;
+printf("%c\n", *(p + 3));
+</pre>
+
+<p>
+Javaでは，文字列のメソッドを通してこれらの操作を行います．Javaが提供しているクラスのメソッドとそれらの使い方は<a href="https://docs.oracle.com/javase/jp/8/docs/api/">APIドキュメント</a>にあります．左下のクラス名一覧から<code>String</code>を選ぶと，<code>String</code>オブジェクトの使い型が表示されます．これによると，文字列中の文字にアクセスするには<code>charAt</code>メソッドを使えばよいことが分かります．<code>charAt</code>を使って，<code>"mojiretsu"</code>の3文字目を表示するプログラムは次のようになります．
+</p>
+
+<pre class="brush: java">
+public class StringExample {
+  public static void main(String[] args) {
+    String str = "mojiretsu";
+    System.out.println(str.charAt(3));
+  }
+}
+</pre>
+
+<p>
+<code>String</code>オブジェクトの便利なメソッドを挙げておきます．
+<dl>
+  <dt><code>charAt(int i)</code></dt>
+  <dd>指定された位置にある文字を返す(C言語の<code>str[]</code>)</dd>
+  <dt><code>compareTo(String s)</code></dt>
+  <dd>文字列<code>s</code>と比較する(C言語の<code>strcmp</code>)</dd>
+  <dt><code>startsWith(String s)</code></dt>
+  <dd>文字列<code>s</code>で始まるかどうかを返す</dd>
+</dl>
+</p>
+
+<p>
+次は配列です．Cでの
+<pre class="ref">
+int a[100];
+double b[10][10];
+</pre></p><p>
+をJavaで行うには，
+<pre class="ref">
+int[] a = new int[100];
+double[][] b = new double[10][10];
+</pre>
+とします．<code>new</code>はオブジェクトを作る命令です．<code>new int[100];</code>によって，長さ100の「<code>int</code>配列オブジェクト」が作られます．「<code>int</code>配列オブジェクト」の型は<code>int[]</code>と書きます．</p>
+
+<p>
+使い方は，Cと同様に
+<pre class="ref">
+a[10] = 0;
+b[3][3] = 0.5;
+</pre></p><p>
+のようにします．
+</p>
+
+<div class="rep">
+<h1>練習問題1</h1>
+
+<p>
+次の5つの文字列からなる配列を作り，その配列中に<code>"an"</code>という文字列がいくつ入っているかと，<code>"an"</code>で始まる文字列がいくつ入っているかを，<code>compareTo</code>と<code>startsWith</code>を使って調べて表示するプログラムを作ってください．
+</p>
+
+文字列:
+<pre class="ref">
+a ant an grasshopper and 
+</pre>
+
+プログラムの雛形:
+<pre class="ref">
+public class CountAn {
+  public static void main(String[] args) {
+    String[] str = /* 5要素の文字列の配列を作る */;
+    int i;
+    int count;
+
+    str[0] = "a";
+    str[1] = "ant";
+    str[2] = "an";
+    str[3] = "grasshopper";
+    str[4] = "and";
+
+    count = 0;
+    for (i = 0; i < 5; i++) {
+      if (/* str[i] が "an" である */)
+        count++;
+    }
+    System.out.println("an: " + count);
+
+    count = 0;
+    /* anで始まる文字列を数える */
+    System.out.println("an...: " + count);
+  }
+}
+</pre>
+
+<p>
+
+</p>
+
+<div class="alert alert-success" role="alert">
+  <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+  <b>ヒント:</b> メソッドの戻り値の型に注意してください．型は<a href="https://docs.oracle.com/javase/jp/8/docs/api/">APIドキュメント</a>に書かれています．<code>compareTo</code>は文字列が一致している時は0を返します．
+</div>
+</div>
+
+<h3>クラス</h3>
+
+<p>
+クラス(class)は，オブジェクトのひな型を定義します．つまり，データ構造とメソッドの具体的な実装方法が記述されます．「テレビ」の例で言えば，設計書のようなものです．「テレビ」が設計書に基づいて大量に生産される様に，実際のオブジェクトの実体はクラスに基づいて生成されます．１つのクラスについて，そのオブジェクトはいくつでも生成することが可能です．
+</p>
+
+<p>
+オブジェクト指向言語では，すべてのオブジェクトは何らかのクラスに属しています．オブジェクトがあるクラスに属している時，そのオブジェクトはそのクラスの<em>インスタンス(instance)</em>であると言います．
+</p>
+
+<p>
+以上をまとめると，インスタンスはクラスから生成されるオブジェクトのことで，クラスはインスタンスの構造（データ構造とメソッド）を記述します．ある時点でのインスタンスの状態はそれまでにそのインスタンスに対して実行された操作によって決まり，通常は同じクラスの別のインスタンスには影響を受けません．
+</p>
+
+<h3>クラスを使ったサンプルプログラム</h3>
+
+<p>
+では，次にJavaでのクラスの記述方法について説明しましょう．上記の説明が良く理解できなかった人は，とりあえず，先にサンプルプログラムを実行してみてから，また戻ってきて，上記の説明を読んでみましょう．
+</p>
+
+<p>
+例として，学生に関するデータとその操作を表現する<code>Student</code>クラスを考えます．以下のように記述してみます．
+</p>
+
+<pre class="brush: java">
+      class Student {
+        String id;    // 学籍番号
+        String name;  // 名前
+        int grade;    // 成績
+    
+        void print() {
+          System.out.println("ID   : " + id);  
+          System.out.println("Name : " + name);
+          System.out.println("Grade: " + grade);
+        }
+      }
+</pre>
+
+<p>
+このようにクラスの定義は，<code>class <クラス名></code>からはじまります．実は，これは最初に説明したJavaの基本的なプログラムにも出てきました．Javaでは，すべてのプログラムはオブジェクトによって構成されることになっているので，前回は<code>main</code>メソッドを含むクラスだけがある，クラスが１つだけのプログラムを作っていたのでした．
+</p>
+
+<p>
+上記のクラスの定義は，よくみるとC言語の構造体(struct)によく似ていますね．実際，構造体に関数を加えたものがクラス(class)であるとも言うことができます．
+</p>
+
+<p>
+Javaでは，クラス中の変数の記述を<em>フィールド(field)</em>，関数を<em>メソッド(method)</em>といいます．それぞれ，「メンバ変数」「メンバ関数」ともいい，この２つをまとめてクラスの<em>メンバ(member)</em>といいます．<code>Student</code>クラスでは2〜4行目でフィールドの定義，6〜10行目でメソッドの定義を行っています．2,3行目では，Java のクラスライブラリに予め用意されている<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/lang/String.html"><tt>String</tt>クラス</a>を用いています．<code>String</code>クラスは特別なクラスで，<code>name = "Suzuki";</code>のように直接文字列を代入することが可能です．6行目からのメソッドでは，<code>System.out.println</code>を用いて，<code>Student</code>クラスの3種類の内部データを表示しています．メソッドから同一クラス内のフィールドに対してアクセスする場合は，そのまま変数名を記述します．
+</p>
+
+<p>
+まとめると，クラスの定義は一般に以下のようになります．
+</p>
+
+<pre class="ref">
+class クラス名 {
+  フィールドの定義
+  ...
+  メソッドの定義
+  ...
+}
+</pre>
+
+<p>
+メソッドは，
+</p>
+
+<pre class="ref">
+戻り値の型 メソッド名(引数) {
+  文;
+  ...
+  return 式;  // void 型の場合は不要
+}
+</pre>
+
+<p>
+となります．
+</p>
+
+<p>
+では，この<code>Student</code>クラスを利用する<code>main</code>メソッドを含んだクラスを用意しましょう．このクラスと<code>Student</code>クラスの両方を含むソースファイルは<a href="../code/1/Student.java"><tt>Student.java</tt></a>です．
+</p>
+
+<pre class="brush: java; first-line: 13;">
+class Main {
+  public static void main(String[] args) {
+    Student st = new Student();
+
+    st.id = "01110";
+    st.name = "Suzuki";
+    st.grade = 100;
+
+    st.print();
+  }
+}
+</pre>
+
+<p>
+ここでは，<code>main</code>メソッドのみをメソッドとして持つ，<code>Main</code>クラスを用意します．Javaではクラス名は大文字から始めるという慣習があります．一方，変数やメソッドの名前は小文字で始めるのが一般的です．フィールドはありません．13行目は前回同様<code>main</code>メソッドです．
+</p>
+
+<p>
+14行目では，<code>Student st</code>で，<code>Student</code>クラス型のオブジェクト変数<code>st</code>を宣言しています．そして，その変数<code>st</code>に対して，<code>new Student()</code>で生成した<code>Student</code>クラスのオブジェクト(インスタンス)を代入しています．一般に，<code>new <クラス名>()</code>でそのクラスのオブジェクトを生成することが出来ます．
+</p>
+
+<p>
+このようにJavaでは，オブジェクト変数とオブジェクト(インスタンス)が明確に区別されていて，それぞれ別々に宣言，生成する必要があります．いわば，オブジェクト変数はオブジェクトを指す「ポインタ変数」の様なもので，<code>Student st1;</code>として，<code>st1 = st;</code>とすれば，<code>st</code>と<code>st1</code>は同じオブジェクトを指すことができます．また，<code>Student st;</code>とだけして，オブジェクトを代入しない場合，初期値は<code>st == null</code>となっています．ここで，<code>null</code>という名前の特別な値は，C言語の<code>NULL</code>に相当し，どのオブジェクトも指していないことを表します．
+</p>
+
+<p>
+Javaでは，<code>int</code>, <code>double</code>など基本データ型を引数とするメソッド呼出しでは値渡しとなりますが，オブジェクトを引数とするメソッド呼出しでは参照渡しになります．
+</p>
+
+<p>
+なお，文字列は<code>String</code>オブジェクトで参照渡しですが，<code>"A" + "B"</code>のように文字列に操作を加えると，新しい別の文字列オブジェクト(この場合<code>"AB"</code>)が生成されることになって，元々のオブジェクトは変化しないでメモリ中に残っているので，<code>String</code>オブジェクトについては表面上は値渡しと同じになります．
+</p>
+
+<p>
+16〜18行目では，<code>Student</code>オブジェクトのフィールドで定義された変数(<em>インスタンス変数(instance variable)</em>とよぶ)に対して，値を代入しています．C言語の構造体と同様に，<code>.</code>(ピリオド)を用いて，<code><オブジェクト変数名>.<インスタンス変数名></code>とすることによって，オブジェクト内の変数を直接アクセスすることができます．メソッドから同一クラス内のフィールドに対してアクセスする場合とは異なりますので，注意してください．
+</p>
+
+<p>
+なお，Javaでは，プログラムを実行するには<code>main</code>メソッドを含むクラス名を <code>java</code>コマンドの後に指定することになっていますので，このプログラムを実行するには，<code>java Student</code>ではなくて，必ず<code>java Main</code>としなければいけないことに注意してください．
+</p>
+
+<p>
+このように，いわゆる「アプリケーション」，つまりユーザが実行したいあるプログラムは，たくさんのインスタンスが集まったものとして実現されます．この例では，<code>Main</code>クラスと<code>Student</code>クラスのインスタンスが1つずつ作られ，利用されていることになります．(厳密には，<code>Main</code>クラスのインスタンスは存在しません．興味がある人はstaticメソッドについて調べてみましょう．)なお，クラスを整理するために，パッケージ(package)という機能も用意されています．クラスが多数になってきた時，いくつかのクラスを1つのパッケージに入れて，まとめて管理できるようにするためです．Eclipseを使うときなど，混乱しないように注意してください．
+</p>
+
+<p>
+では，次に<code>Student</code>オブジェクトを2人分生成してみましょう．このクラスと<code>Student</code>クラスの両方を含むソースファイルは<a href="../code/1/Student2.java"><tt>Student2.java</tt></a>です．
+</p>
+<pre class="brush: java; first-line: 13;">
+class Main2 {
+  public static void main(String[] args) {
+    Student st  = new Student();
+    Student st2 = new Student();
+    st.id    =  "01110"; st2.id    =  "01111";
+    st.name  = "Suzuki"; st2.name  = "Yamada";
+    st.grade =      100; st2.grade =       80;
+
+    st.print();       
+    st2.print();
+  }
+}
+</pre>
+
+<p>
+14行目，15行目で2つの<code>Student</code>オブジェクトを生成しています．その後，それぞれに値を代入しています．21行目で<code>st2.print()</code> を呼び出していますが，20行目の<code>st.print()</code>とは出力結果が異なります．それぞれ対応するオブジェクトのフィールドの中身が表示されます．このように，メソッドは対応するオブジェクトのデータを処理することになります．
+</p>
+
+<p>
+でも，あれ？ と思った人もいるかも知れません．オブジェクト指向では，オブジェクトの内部にはメソッドを通してしかアクセスできないということになっていたのでは？ と思われるかもしれません．Javaでは，Cの構造体と同様に，標準ではインスタンス変数に外部からアクセスすることが可能になっています．これを禁止するには，フィールドの変数定義の前に，<code>private</code>修飾子を付けます．こうすると，その変数は同一クラス内のメソッドからしか参照することが出来なくなります．この<code>private</code>修飾子を用いることによって，データのカプセル化（情報隠蔽）が実現できます．
+</p>
+
+<div class="alert alert-info" role="alert">
+  <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+  <span class="sr-only">Tips:</span>
+  Javaでプログラミングする場合は，インスタンス変数にはできる限り<code>private</code>修飾子を付けるようにして，不用意な外部からのアクセスを防ぐようにしましょう．
+</div>
+
+<p>
+<code>private</code>修飾子を付けると外部からはそのインスタンス変数にアクセスできなくなってしまいます．そこで，プライベートデータに外部からアクセスするためには，<code>private</code>なインスタンス変数に値をセットするためのメソッドと，その値を参照するためのメソッドを用意する必要があります．
+<!--このプライベートデータへのアクセスを行う関数は「インターフェース関数」と呼
+    ばれることがあります．-->
+</p>
+
+<p>
+<code>Student</code>クラスのフィールドに<code>private</code>をつけると次のようになります．
+</p>
+
+<pre class="brush: java;">
+class Student {
+  private String id;    // 学籍番号
+  private String name;  // 名前
+  private int grade;    // 成績
+
+  void print() {
+    System.out.println("ID   : " + id);  
+    System.out.println("Name : " + name);
+    System.out.println("Grade: " + grade);
+  }
+}
+</pre>
+
+<div class="rep" id="rep2">
+<h1>練習問題2</h1>
+
+<p>
+<code>main</code>メソッドは修正しないでそのままで，サンプルプログラム(<code>Student2.java</code>の方です)の<code>Student</code>クラスのすべてのフィールドに，上記の様に<code>private</code>修飾子をつけてみて下さい．このように定義した<code>Student</code>クラスを用いると，コンパイル時にどのようなことが起こるでしょうか？試してみてください．
+</p>
+
+<p>
+また，<code>Student</code>クラス内の<code>void print()</code>を<code>private void print()</code>に変更するとどうなるでしょうか？ 試してみてください．
+</p>
+</div>
+
+<p>
+<a href="#rep2">練習問題2</a>の結果から分かるように，<code>private</code>修飾子を付けると，インスタンス変数<code>id</code>，<code>name</code>，<code>grade</code>には外部からアクセスすることができませんので，値をセットすることができず，結局外部から利用できないクラスになってしまいます．また，メソッドに<code>private</code>を付けると，<code>Student</code>クラス内のメソッド以外からは呼び出すことができなくなります．
+</p>
+
+<p>
+データがセットできないと，オブジェクトの存在する意味がありませんので，<code>private</code>フィールドにデータをセットする<code>private</code><b>でない</b>メソッドを<code>Student</code>クラス内に用意します．<code>Student</code>クラス内のメソッドからは，<code>private</code>なインスタンス変数にも問題なくアクセスできます．
+</p>
+
+<p>
+次のように引数で受け取った値をインスタンス変数にセットするだけのメソッドを用意します．
+</p>
+
+<pre class="brush: java; first-line: 11;">
+void setId(String i) {
+  id = i;
+}
+void setName(String n) {
+  name = n;
+}
+void setGrade(int g) {
+  grade = g;
+}
+</pre>
+
+<p>
+もし，引数の変数名とインスタンス変数の名前が同じだとどうなるでしょう？その場合は，引数の変数名がメソッド内のローカル変数ということで，優先されます．(C言語でもそうでしたね．）このような場合には， <code>this</code>修飾子をインスタンス変数の名前の前につけることで，ローカル変数と区別することが可能です．<code>this</code>が付いている変数がインスタンス変数を表し，付いていない方は引数のローカル変数を表します．<code>this</code>を使うと以下のようにも書くことができます．
+<!--<font color=red>(このthisに関する説明は10/17に追加しました．)</font>-->
+</p>
+
+<pre class="brush: java; first-line: 11;">
+void setId(String id) {
+  this.id = id;
+}
+void setName(String name) {
+  this.name = name;
+}
+void setGrade(int grade) {
+  this.grade = grade;
+}
+</pre>
+
+<div class="rep" id="rep3">
+<h1>練習問題3</h1>
+
+<p>
+サンプルプログラム<code>Student2.java</code>の<code>main</code>メソッドを上記のデータをセットするだけのメソッドを利用するように書き換えて下さい．<code>Student</code>クラスに<code>private</code>修飾子を付ける前と同じ動作をすることを実行結果で確認してください．
+</p>
+</div>
+
+<div class="rep">
+<h1>練習問題4</h1>
+
+<p>
+3種類の値(ID，名前，成績)を一度にセットするメソッド<code>void set(String id0, String name0, int grade0)</code>を<code>Student2.java</code>の<code>Student</code>クラス内に追加して下さい．さらに，<code>main</code>メソッドを変更して実行結果を確認してください．
+</p>
+</div>
+
+<div class="rep">
+<h1>練習問題5</h1>
+
+<p>
+<a href="#rep3">練習問題3</a>のようにインスタンス変数に値をセットするメソッドを用意すると，その中で値の範囲のチェックなどを行うことができます．インスタンス変数<code>grade</code>が 常に0から100までの値をとるように<code>set</code>メソッドに値チェック機能を追加しましょう．ここでは，0未満の時は<code>grade = 0</code>，100より大きいときは<code>grade = 100</code>としましょう．
+</p>
+
+<p>
+実際に0未満や100より大きい数を入力して，チェックがうまく機能しているかどうか結果を確認してください．
+</p>
+</div>
+
+<p>
+Java では，フィールドに対する修飾子として，<code>private</code>，<code>public</code>，<code>protected</code>，「なし」の4通りがあります．ここでは，外部に非公開の<code>private</code>，公開の<code>public</code>，<code>public</code>と同様に公開の「なし」を覚えてください．実際には「なし」と<code>public</code>の間には違いがありますが，それは次回以降に説明します．<code>protected</code>はクラスの<em>継承(inheritance)</em>を行うときに使われますので，次週以降，継承と併せて説明します．
+</p>
+
+<p>
+4通りの修飾子は，メソッドに関しても同様に用いられ，<code>private</code>メソッドは同一クラス内のメソッドからしか呼び出すことが出来ません．
+</p>
+
+<div class="alert alert-danger" role="alert">
+  <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+  <span class="sr-only">Warning:</span>
+この後の説明からは，フィールド，メソッドともに，「なし」は使わないようにして，<code>public</code>か<code>private</code>かが明確になるようにどちらかの修飾子を付けるようにします．皆さんもそのような習慣を付けた方がいいでしょう．
+</div>
+
+<h3>コンストラクタ</h3>
+
+<p>
+Javaには，<code>new</code>を用いてオブジェクトを生成する時に，内部のフィールドの値を設定する方法があります．それを<em>コンストラクタ(constructor)</em>といいます．<code>new</code>を行う時には，必ず クラス名の後に<code>()</code>がつきましたが，実はこの括弧の中に引数を書いて，コンストラクタに渡すことが出来ます．これは，<code>new</code>を行ったときに実行されるメソッドともいえるもので，以下のように記述します．
+</p>
+
+<pre class="brush: java;">
+class Student {
+  private String id;    // 学籍番号
+  private String name;  // 名前
+  private int grade;    // 成績
+
+  public Student(String id, String name, int grade) {
+    this.id = id; this.name = name; this.grade = grade;  
+    // gradeは範囲チェックした方がよい．
+  }
+  ....
+}
+</pre>
+
+<p>
+コンストラクタは，6〜9行目にあたります．このようにコンストラクタは，クラス名と同じ名前のメソッドで，返り値はないので，型名はありません．コンストラクタを呼び出すとき，つまりオブジェクトを作成するときには
+</p>
+
+<pre class="ref">
+Student st = new Student("123", "Ichiro", 100);
+</pre>
+
+<p>
+のように<code>new</code>クラス名のあとの<code>()</code>内に引数を記述します．
+</p>
+
+<p>
+なお，コンストラクタは複数定義することが可能で，引数の並びによって区別されます．また，1つ以上のコンストラクタを定義すると，デフォルトの引数なしのコンストラクタは利用出来なくなります．どうしても利用したい場合は，
+</p>
+
+<pre class="ref">
+public Student() {}
+</pre>
+
+<p>
+のように引数なしの何も動作しないコンストラクタを明示的に記述する必要があります．なお，コンストラクタを<code>private</code>にすることも可能ですが，特殊な状況でしか利用しませんので，コンストラクタは常に<code>public</code>と覚えてしまって構いません．
+</p>
+
+<div class="rep">
+<h1>練習問題6</h1>
+
+<p>
+直接代入や<code>set</code>メソッドを用いる代わりに，コンストラクタで値をセットしてみてください．さらに実行結果が同じになることを確認してください．
+</p>
+</div>
+
+<p>
+これで，クラスの基本は説明しました．それでは，やや大きなクラスの例<a href="turtle.html"><tt>Turtle.java</tt></a>を眺めてみましょう．内容について細かい部分は分かる必要はありませんが，<code>private</code>や<code>public</code>のフィールドと，たくさんのメソッドが<code>Turtle</code>クラスの中に記述されているのが分かると思います．
+</p>
+
+<H3>オブジェクトを持つクラス</H3>
+
+<p>
+今度は先ほどの<code>Student</code>クラスを利用して，<code>Student</code>クラスをフィールドメンバにもつ<code>Lesson</code>クラスを考えてみましょう．
+</p>
+
+<a name="lesson">
+<pre class="brush: java; first-line: 1;">
+class Lesson {
+  private String name;    // 課題名
+  private String teacher; // 担当者 
+  private int max;        // 最大履修者数
+  private int num;        // 登録履修者数
+  private Student[] st;   // Studentの配列
+      
+  public Lesson(String name, String teacher, int max) {
+    this.name = name;
+    this.teacher = teacher;
+    this.max = max;  
+    this.num = 0;          // numは0に初期化
+    st = new Student[max]; // 配列の確保(オブジェクトは別に生成する必要あり)
+  }
+  public void add(Student s) {
+    st[this.num++] = s; 
+  }
+  public void print() {
+
+    // ここに System.out.print や Studentオブジェクトの
+    // 中身の表示(printShortメソッドの呼び出し)を追加しましょう．
+
+    System.out.println("----------");  
+  }
+}    
+</pre>
+</a>
+<!--
+    18      System.out.println("Lesson   :"+name);  
+    19      System.out.println("Teacher  :"+teacher);  
+    20      System.out.println("#Students:"+num);  
+    21      for(int i=0;i&lt;num;i++)
+    22        st[i].printShort();
+-->
+<p>
+ここで注意する点としては，6行目の<code>Student</code>クラスの配列の定義では，配列自体は確保されないので，12行目のコンストラクタの中で配列のサイズを指定して，確保してやる必要があります．さらに，これではオブジェクト変数の配列が確保されただけですので，オブジェクト自体は1つずつ<code>new</code>を用いて生成し，この配列に代入してやる必要があります．ここでは，<code>Student</code>型の変数を引数にとる<code>public</code>メソッド<code>add</code>を用意して，外部から<code>Student</code>オブジェクトを<code>Lesson</code>オブジェクトに登録できるようにしました．
+</p>
+
+<p>
+なお，<code>Student</code>クラスには，学籍番号，名前，成績を1行で表示する<code>printShort</code>を追加して下さい．これを<code>Lesson</code>クラスの<code>print</code>から呼ぶことにします．
+</p>
+
+<pre class="ref">
+public void printShort() {
+  System.out.println(id + ", " + name + ", " + grade);  
+}
+</pre>
+
+<p>
+この<code>Lesson</code>クラスを利用するには，
+</p>
+
+<pre class="ref">
+Lesson l = new Lesson("Pro Enshu", "Yanai", 100);
+l.add(new Student("01220", "Dentsu Taro", 80));
+</pre>
+
+<p>
+などとします．なお，C言語では通常，<code>malloc</code>関数で構造体のメモリを確保した場合は，後で<code>free</code>関数でメモリ解放するために一度ポインタ変数に代入して覚えておきますが，Javaの場合はシステムがガーベジコレクション(ごみ集め)と呼ばれる処理によって自動的にメモリ解放しますので，メモリ解放のことは考える必要がなく，引数で<code>new</code>としてオブジェクトを生成して渡してやることがよく行われます．
+</p>
+
+<div class="rep">
+<h1>練習問題7(提出課題)</h1>
+
+<p>
+<code>Lesson</code>クラスのすべてのフィールドの内容を表示するメソッド<code>void print</code>を完成させてください．例えば，表示は以下のようになります．
+
+<pre class="ref">
+Lesson            : Pro Enshu
+Teacher           : Yanai
+Number of Students: 4
+012200, Dentsu Taro, 80
+012205, Uec Jiro, 54
+012207, Chofu Saburo, 70
+012210, Enshu Shiro, 60
+----------
+</pre>
+
+<div class="alert alert-success" role="alert">
+  <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+  <b>ヒント:</b> <code>for</code>文を使って，<code>st[0]</code>，...，<code>st[num-1]</code>のオブジェクトについて，順番に<code>Student</code>クラスの<code>printShort</code>メソッドを呼び出しましょう．ループ変数を<code>i</code>とすると，<code>st[i].printShort()</code>で呼び出せます．
+</div>
+
+<p>
+今回の最初のサンプルプログラムの<code>Main</code>クラスを参考にして，<code>main</code>メソッドを持ったクラスを実装して，必ず<code>Student</code>を3名分以上登録して，<code>Lesson</code>クラスの<code>print</code>メソッドが正しく動作するか確認してください．
+</p>
+
+<p>
+ソースコードと実行結果の両方を一緒にWebClassシステムに貼り付けて提出してください．
+</p>
+
+<input class="btn btn-success" type="button" value="さらにヒント: print()の答えです" style="font-size:large;"
+onclick="
+  if (document.getElementById('hide1').style.display == 'block') {
+    document.getElementById('hide1').style.display='none';
+  } else {
+    document.getElementById('hide1').style.display='block';
+  }
+"/>
+<div id="hide1" style="display: none; margin-top: 16px; ">
+<p>
+以下のように<code>name</code>，<code>teacher</code>，<code>num</code>を順番に表示したら，<code>st[0]</code>から<code>st[num-1]</code>まで順番に<code>printShort()</code>メソッドを呼び出していきます．
+</p>
+
+<pre class="brush: java; first-line: 17;">
+public void print() {
+  System.out.println("Lesson            : " + name);  
+  System.out.println("Teacher           : " + teacher);  
+  System.out.println("Number of Students: " + num);  
+  for (int i = 0; i < num; i++)
+    st[i].printShort();
+  System.out.println("----------");
+}
+</pre>
+
+<p>
+あとは，<code>main</code>メソッドだけですね．頑張って仕上げて下さい．
+</p>
+</div>
+
+</div>
+
+<div class="rep">
+<h1>練習問題8 (自由課題，提出は任意)</h1>
+
+<p>
+<code>Lesson</code>クラスに，登録データを学生番号の昇順，名前のアルファベット順，成績の降順でソートするメソッド<code>void sortId()</code>，<code>void sortName()</code>，<code>void sortGrade()</code>を追加しましょう．なお，文字列の比較は，<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/lang/String.html#compareTo-java.lang.String-"><tt>compareTo</tt></a>を利用します．<code>str1.compareTo(str2)</code>で，<code>str1</code>が<code>str2</code>よりも辞書順で前にあるときは負の値，等しいときは0，後にある場合は正の値を返します．
+</p>
+
+<p>
+ソートは，次のバブルソートのコードを参考にして下さい．
+</p>
+
+<pre class="brush: java; first-line: 11;">
+void bubbleSort(int n) {
+  int i, j, t;
+  for (i = n; i &gt; 1; i--)
+    for (j = 1; j &lt; i; j++)
+      if (a[j-1] &gt; a[j]) {
+        t = a[j-1]; a[j-1] = a[j]; a[j] = t; 
+      }
+}
+</pre>
+
+<p>
+もしくは，<a href="https://docs.oracle.com/javase/jp/8/docs/api/java/util/Arrays.html#sort-T:A-int-int-java.util.Comparator-"><tt>java.util.Arrays.sort</tt></a>メソッドを利用することもできます．ただし，インタフェースについての知識が必要なので，Java熟達者向けです．ジェネリクスについても分かっている必要があります．
+</p>
+</div>
+
+<div class="rep">
+<h1>練習問題9 (自由課題，提出は任意)
+</h1>
+
+<p>
+<code>Lesson</code>クラスは生成時に最大履修者数(<code>max</code>)を指定しています．では，登録する生徒数が履修者を超えた場合に何が起きるか，試してみましょう．さらに，そのような場合には人数超過であるという警告を表示し，その生徒については追加せず，<code>main</code>メソッドが最後まで(つまり，<code>Lesson</code>クラスの<code>print()</code>メソッドの呼出しがきちんと終了するまで)走るように修正を加えてみてください．
+</p>
+</div>
+<!--
+<br>
+<h3>タートルグラフィクス (おまけ．以下，すべて自由課題です)</H3>
+<p>
+「すべての人のためのJavaプログラミング」という本では，
+タートルグラフィクスが例題で使われています．ここでは，
+for, whileなどの制御構造の練習をかねて，タートルグラフィクスで
+いろいろな絵を描いてみましょう．
+</p>
+<p>
+タートルグラフィクスでは，まず最初に，中央に「亀」が配置されます．
+最初は亀は画面の右方向(x方向)を向いているとします．「亀」はペンを
+持っていて，亀の歩いた軌跡に線が描かれます．
+</p>
+<p>
+プログラムで「亀」の歩く方向と，歩く距離を指定します．
+方向は向く方向と角度を指定します．歩く距離は歩く方法と距離を指定します．
+</p><p>
+向く方向の指定はRIGHTとLEFTが
+あって，RIGHTは時計回りに，LEFTは反時計回りにそれぞれ，指定された度数(0〜
+360)回転します．
+</p><p>
+歩く(MOVE)距離の指定は画面のピクセル単位で行います．通常はペンは下げられた状態
+(DOWN)で歩いた分だけ線が描かれますが，ペンを持ち上げた状態(UP)であれば，
+線は描かれません．
+また，色(BLACK,
+RED, BLUE, GREEN, YELLOW) を指定することによって，線の色を変えることが
+できます．
+</p>
+<p>
+例えば，以下のように亀を制御すれば，その下の図のような
+絵が描かれます．
+</p>
+<pre class=ref>
+ RIGHT 90
+ MOVE 50
+ LEFT 135
+ MOVE 25
+ LEFT 180
+ UP
+ MOVE 25
+ RIGHT 90
+ DOWN
+ DRAW 25
+ UP
+ MOVE 25
+</pre>
+<img src="turtle.png" width=600/>
+
+<p>では，実際にこれをJavaで行ってみましょう．
+</p>
+<p>では，まず 
+<a href="../code/1/Turtle.java">Turtle.java</a> と
+<a href="../code/1/TurtleFrame.java">TurtleFrame.java</a>
+をそれぞれ右クリックで「名前を付けてリンク先を保存」を選択して，
+ダウンロードして下さい．そして，
+</p>
+<pre class=ref>
+  javac Turtle.java TurtleFrame.java
+</pre>
+<p>
+としてコンパイルしましょう．先ほどのサンプルと
+同じ動作をするプログラムは次の様になります．
+</p>
+<pre class="brush: java">
+      public class Tsamp {
+         public static void main(String[] args){
+            TurtleFrame f;             // TurtleFrame型の変数 f の宣言
+            f =  new TurtleFrame();    // TurtleFrame(表示フレーム)を生成しfに代入
+            Turtle m = new Turtle();   // Turtle(亀)を生成し，m の初期値として代入
+            f.add(m);                  // f(表示フレーム) に m(亀) を追加
+            m.rt(180);  // 亀を下に向けます．(ライブラリの初期状態では上を向いています)
+            m.fd(50);                  // 前に 50 進め
+            m.lt(135);                 // 左に 135 度回り
+            m.fd(25);                  // 前に 25 進め
+            m.rt(180);                 // 右に 180 度回転 (方向転換)
+            m.up(); m.fd(25); m.down();// 前に ペンをあげて 25 進め
+            m.rt(90);                  // 右に 90度回転
+            m.fd(25);                  // 前に 25 進め
+            m.up(); m.fd(25); m.down();// 前に ペンをあげて 25 進め
+         }
+      }
+</pre>
+<p>
+タイプするのは面倒なので，同様に
+<a href="../code/1/Tsamp.java">Tsamp.java</a>
+を右クリックしてダウンロードしましょう．
+</p>
+<pre class=ref>
+  javac Tsamp.java
+  java Tsamp
+</pre><p>
+で実行できます．</p>
+<p>
+上記の例では，左右の回転，前進，ペンの上げ下げしか行っていません．
+これだけでいろいろな絵が描けるようになります．
+まとめると以下のようになります．</p>
+<pre class=ref>
+  m.rt(n) : 亀m を 右にn度回転
+  m.lt(n) : 亀m を 左にn度回転
+  m.fd(n) : 亀m が nピクセル前進
+  m.up()  : 亀m のペンをあげる
+  m.down(): 亀m のペンを下げる
+</pre>
+<p>
+なお，初期状態では，TurtleFrame(表示フレーム)の大きさは400x400で，
+亀は中央の200x200の座標の位置に上向きで静止しています．では，
+亀の動作を変えて，遊んでみましょう．6行目までは常に同じで構いませんので，
+7行目から15行目を変えてみましょう．
+</p>
+
+<div class=rep>
+<h1>練習問題9 (自由課題，提出は任意)
+&nbsp;&nbsp;&nbsp;
+<INPUT type="button" value="解答提出" onClick="answer(1,9)" style="font-size:large;">
+</h1> 
+<p>for か whileを使って，多角形を書いてみましょう．
+20角形を書いてみて下さい．(ヒント：n角形を描くときは，
+360/n 度だけ回転します．)</p>
+
+<p>forとwhileは，C言語と全く同じです．
+i をループ変数として1から20までループさせるには，
+forの場合，whileの場合それぞれ
+以下のように書きます．</p>
+<pre class=ref>
+  for(int i=1;i<=20;i++){
+    実行する文
+  }
+
+  int i=1;
+  while(i++<=20){
+    実行する文
+  }
+</pre>
+<p>
+プログラムのテキストだけでなくて，
+結果をスクリーンキャプチャして，PDFでアップロードして下さい．
+<a href="../screen.html">ここ</a> を参考にして下さい．</p>
+</div>
+
+<div class=rep>
+<h1>練習問題10 (自由課題，提出は任意)
+&nbsp;&nbsp;&nbsp;
+<INPUT type="button" value="解答提出" onClick="answer(1,10)" style="font-size:large;">
+</h1> 
+<p>練習問題9では，回転角度は
+360/n 度でしたが，(360*k)/n 度 (kは2以上)
+にすると星形のようなギザギザした図形を書くことが
+出来ます．
+</p>
+<p>自由に星形図形を書いてみて下さい．(星型の提出は必須)
+</p>
+<p>
+星形に限らず面白い図形が書けたら提出してみて下さい．
+2重ループを使うと面白いでしょう．
+</p>
+</div>
+<HR>
+<div class=rep>
+<h1>練習問題11 (自由課題，提出は任意)
+&nbsp;&nbsp;&nbsp;
+<INPUT type="button" value="解答提出" onClick="answer(1,11)" style="font-size:large;">
+</h1>
+<p>
+今日の感想があれば書いて下さい．
+特に理解が難しかった箇所などがあったら，書いてください．
+</p>
+</div>
+-->
+<hr>
+<i>電気通信大学 情報理工学部 情報・通信工学科 5学期 MICS実験第一 資料</i>
+</body> </html>

@@ -1,0 +1,41 @@
+//
+// Dialog (Input,Confirm,Message) sample sorce code 
+//
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+class TestDialog {
+  public static void main(String argv[]) {
+    final JFrame frame = new JFrame("Test Dialog");
+    final JLabel l= new JLabel("");
+    final JButton b=new JButton("open dialog");
+    ActionListener al = new ActionListener(){
+      public void actionPerformed(ActionEvent e){
+	String s = JOptionPane.showInputDialog(b,"your name?");
+	
+	int result = JOptionPane.showConfirmDialog(b,"Are you "+s+"?");
+	switch(result){
+	  case JOptionPane.YES_OPTION:
+	    l.setText("You are "+s+" .");
+	    break;
+	  case JOptionPane.NO_OPTION:
+	    l.setText("You are not "+s+" .");
+	    break;
+	  case JOptionPane.CANCEL_OPTION:
+	  case JOptionPane.CLOSED_OPTION:
+	    l.setText("");
+	    JOptionPane.showMessageDialog(b,"Error");
+	}
+      }
+    };
+    l.setHorizontalAlignment(SwingConstants.CENTER);
+    frame.getContentPane().add(l,BorderLayout.CENTER);
+    frame.getContentPane().add(b,BorderLayout.SOUTH);
+    b.addActionListener(al);
+    frame.setSize(300,300);
+    frame.show();	
+  }		       
+}
+
