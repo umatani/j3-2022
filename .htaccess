@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName      "Authentication required"
+AuthUserFile  /home/lab8/umatani/public_html/uec-mics-j3/.htpasswd
+Require       valid-user
